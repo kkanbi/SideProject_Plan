@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로젝트 타임라인 (2025-2027)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #6b7280;
+        }
+
+        .tab:hover {
+            background: #f3f4f6;
+        }
+
+        .tab.active {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 간트차트 스타일 */
+        .gantt-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .gantt-header {
+            display: flex;
+            margin-bottom: 20px;
+            min-width: 1200px;
+        }
+
+        .gantt-label {
+            width: 200px;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .gantt-timeline {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 4px;
+        }
+
+        .month-label {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 8px 4px;
+        }
+
+        .gantt-row {
+            display: flex;
+            margin-bottom: 16px;
+            min-width: 1200px;
+        }
+
+        .project-name {
+            width: 200px;
+            flex-shrink: 0;
+            padding: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .gantt-bars {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 4px;
+            align-items: center;
+        }
+
+        .gantt-bar {
+            height: 40px;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .gantt-bar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-learning { background: #3b82f6; }
+        .bar-preparation { background: #f59e0b; }
+        .bar-launch { background: #10b981; }
+        .bar-revenue { background: #8b5cf6; }
+        .bar-passive { background: #6b7280; }
+        .bar-writing { background: #ec4899; }
+        .bar-creation { background: #f97316; }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 전체 요약 스타일 */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-period {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-period h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .project-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .project-icon {
+            font-size: 24px;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+
+        .project-status {
+            font-size: 11px;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .project-detail {
+            font-size: 10px;
+            color: #9ca3af;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>프로젝트 타임라인 (2025-2027)</h1>
+            <p>복직까지 2년, 월 200만원 목표</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('gantt')">📊 간트차트</button>
+            <button class="tab" onclick="showTab('summary')">📋 전체 요약</button>
+        </div>
+
+        <!-- 간트차트 -->
+        <div id="gantt-view" class="gantt-container">
+            <div class="gantt-header">
+                <div class="gantt-label">프로젝트</div>
+                <div class="gantt-timeline">
+                    <div class="month-label">10월<br>2025</div>
+                    <div class="month-label">11월<br>2025</div>
+                    <div class="month-label">12월<br>2025</div>
+                    <div class="month-label">1월<br>2026</div>
+                    <div class="month-label">2월<br>2026</div>
+                    <div class="month-label">3월<br>2026</div>
+                    <div class="month-label">4월<br>2026</div>
+                    <div class="month-label">5월<br>2026</div>
+                    <div class="month-label">6월<br>2026</div>
+                    <div class="month-label">7월<br>2026</div>
+                    <div class="month-label">8월<br>2026</div>
+                    <div class="month-label">9월<br>2026</div>
+                    <div class="month-label">10월<br>2026</div>
+                    <div class="month-label">11월<br>2026</div>
+                    <div class="month-label">12월<br>2026</div>
+                    <div class="month-label">Q1<br>2027</div>
+                    <div class="month-label">Q2<br>2027</div>
+                    <div class="month-label">복직후<br>2027+</div>
+                </div>
+            </div>
+
+            <div class="gantt-row">
+                <div class="project-name">📱 뽀모도로 앱</div>
+                <div class="gantt-bars">
+                    <div class="gantt-bar bar-learning">학습</div>
+                    <div class="gantt-bar bar-learning">개발</div>
+                    <div class="gantt-bar bar-launch">출시</div>
+                    <div class="gantt-bar bar-revenue">안정화</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">성장</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-passive">방치</div>
+                </div>
+            </div>
+
+            <div class="gantt-row">
+                <div class="project-name">🎨 버튜버 외주</div>
+                <div class="gantt-bars">
+                    <div class="gantt-bar bar-learning">블렌더</div>
+                    <div class="gantt-bar bar-learning">캐릭터</div>
+                    <div></div>
+                    <div class="gantt-bar bar-learning">유니티</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-preparation">포폴</div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">첫외주</div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">안정화</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">유지</div>
+                </div>
+            </div>
+
+            <div class="gantt-row">
+                <div class="project-name">📝 웹소설</div>
+                <div class="gantt-bars">
+                    <div class="gantt-bar bar-learning">기획</div>
+                    <div class="gantt-bar bar-writing">집필</div>
+                    <div></div>
+                    <div class="gantt-bar bar-writing">집필</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-writing">집필</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-launch">완성</div>
+                    <div class="gantt-bar bar-launch">투고</div>
+                    <div class="gantt-bar bar-passive">2작</div>
+                </div>
+            </div>
+
+            <div class="gantt-row">
+                <div class="project-name">🖼️ 스톡 이미지</div>
+                <div class="gantt-bars">
+                    <div class="gantt-bar bar-learning">리서치</div>
+                    <div class="gantt-bar bar-creation">80장</div>
+                    <div></div>
+                    <div class="gantt-bar bar-creation">160장</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">400장</div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-revenue">600장</div>
+                    <div></div>
+                    <div></div>
+                    <div class="gantt-bar bar-passive">방치</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 16px;">💰 월별 예상 수익</h3>
+                <div class="gantt-row">
+                    <div class="project-name">총 수익</div>
+                    <div class="gantt-bars">
+                        <div style="text-align: center; font-size: 12px; color: #6b7280;">0원</div>
+                        <div style="text-align: center; font-size: 12px; color: #6b7280;">0원</div>
+                        <div style="text-align: center; font-size: 12px; color: #6b7280;">0원</div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #3b82f6;">20만원</div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #8b5cf6;">50만원</div>
+                        <div></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #8b5cf6;">130만원</div>
+                        <div></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #10b981;">200만원</div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #10b981;">250만원</div>
+                        <div></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: 600; color: #10b981;">200만원</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 전체 요약 -->
+        <div id="summary-view" class="hidden">
+            <div class="summary-grid">
+                <div class="summary-period">
+                    <h3>2025년 10월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">학습</div>
+                            <div class="project-detail">Dart 문법 + Flutter 위젯 기초 (30시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">학습</div>
+                            <div class="project-detail">블렌더 인터페이스 + 간단한 모델링 (20시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">기획</div>
+                            <div class="project-detail">플롯 구상 + 캐릭터 설정 + 세계관 (6시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">리서치</div>
+                            <div class="project-detail">Midjourney 테스트 + 시장 조사 (6시간)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2025년 11~12월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">개발 → 출시</div>
+                            <div class="project-detail">타이머+UI 개발 → 알림+통계 → 앱스토어 출시 (150시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">캐릭터 제작</div>
+                            <div class="project-detail">캐릭터 3개 모델링 + 텍스처링 완성 (150시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">집필 시작</div>
+                            <div class="project-detail">매일 30~40분 집필, 1~10화 완성 (40시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">80장 제작</div>
+                            <div class="project-detail">AI 이미지 50장 + 블렌더 렌더 30장 (26시간)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2026년 1~4월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">안정화</div>
+                            <div class="project-detail">버그 수정 + 리뷰 대응 + 프리미엄 버전 (월 10시간, 월 20만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">유니티 학습</div>
+                            <div class="project-detail">유니티 기초 + 블렌더 연동 + 리깅 + 표정/립싱크 (월 27시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">꾸준히 집필</div>
+                            <div class="project-detail">매일 30분, 11~25화 집필 (월 15시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">틈틈이 제작</div>
+                            <div class="project-detail">머리 식힐 때 월 20장씩, 총 160장 누적 (월 10시간)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2026년 5~6월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">성장</div>
+                            <div class="project-detail">기능 업데이트 + 마케팅, 사용자 증가 (월 10시간, 월 50만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">포트폴리오</div>
+                            <div class="project-detail">모델 2개 추가 + Booth 오픈 + TikTok 마케팅 (월 120시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">집필 가속</div>
+                            <div class="project-detail">매일 1시간, 26~70화 집필 (월 40시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">부산물 활용</div>
+                            <div class="project-detail">버튜버 작업 부산물로 월 30~40장 제작 (월 13시간)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2026년 7~8월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">수익화</div>
+                            <div class="project-detail">안정적 수익 구조, 사용자 기반 확보 (월 10시간, 월 50만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">✅ 첫 외주</div>
+                            <div class="project-detail">첫 외주 1~2건 + 템플릿 시스템 구축 (월 120시간, 월 80만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">집필 중</div>
+                            <div class="project-detail">매일 1시간, 계속 집필 (월 40시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">수익 시작</div>
+                            <div class="project-detail">총 400장 누적, 수익 발생 시작 (월 13시간, 월 3만원)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2026년 9~11월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">안정 수익</div>
+                            <div class="project-detail">최소 유지보수만, 안정적 수익 (월 10시간, 월 50만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">월 2~3건</div>
+                            <div class="project-detail">템플릿으로 빠른 작업, 월 2~3건 안정화 (월 120시간, 월 150만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">집필 중</div>
+                            <div class="project-detail">매일 1시간, 완성 단계 진입 (월 40시간)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">누적 증가</div>
+                            <div class="project-detail">외주 부산물 활용, 누적 효과 (월 13시간, 월 4만원)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2026년 12월~2027년 6월</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">자동화</div>
+                            <div class="project-detail">완전 자동화, 유지보수 최소화 (월 4시간, 월 60만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">템플릿화</div>
+                            <div class="project-detail">템플릿 완전 자동화, 작업시간 50% 단축 (월 120시간, 월 180만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">✅ 완성+투고</div>
+                            <div class="project-detail">1작 완성 20만자 → 카카오페이지/문피아/조아라 투고</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">600장 달성</div>
+                            <div class="project-detail">총 600장 누적 완료 (월 10시간, 월 5만원)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-period">
+                    <h3>2027년 7월~ (복직)</h3>
+                    <div class="project-card">
+                        <span class="project-icon">📱</span>
+                        <div class="project-info">
+                            <div class="project-card-name">뽀모도로 앱</div>
+                            <div class="project-status">방치</div>
+                            <div class="project-detail">완전 방치 모드, 수동 소득 (월 4시간, 월 60만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🎨</span>
+                        <div class="project-info">
+                            <div class="project-card-name">버튜버 외주</div>
+                            <div class="project-status">월 1~2건</div>
+                            <div class="project-detail">복직 후 주 14시간 중 10시간 투입 (월 40시간, 월 120만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">📝</span>
+                        <div class="project-info">
+                            <div class="project-card-name">웹소설</div>
+                            <div class="project-status">2작 시작</div>
+                            <div class="project-detail">출퇴근 시간 활용 2작 집필 (월 8시간, 월 ?만원)</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">수동 소득</div>
+                            <div class="project-detail">더 이상 제작 안함, 600장 수동 소득 (월 0시간, 월 8만원)</div>
+                        </div>
+                    </div>d-name">웹소설</div>
+                            <div class="project-status">2작 시작</div>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <span class="project-icon">🖼️</span>
+                        <div class="project-info">
+                            <div class="project-card-name">스톡 이미지</div>
+                            <div class="project-status">수동 소득</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all views
+            document.getElementById('gantt-view').classList.add('hidden');
+            document.getElementById('summary-view').classList.add('hidden');
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected view
+            if (tabName === 'gantt') {
+                document.getElementById('gantt-view').classList.remove('hidden');
+                event.target.classList.add('active');
+            } else if (tabName === 'summary') {
+                document.getElementById('summary-view').classList.remove('hidden');
+                event.target.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
