@@ -153,9 +153,332 @@
       <p class="muted caption">목표 달성 = 성장포인트 획득. 10일 미접속 시 요정과 정원이 잠듭니다.</p>
     </div>
 
+    <!-- 4. 화면 구성 -->
+    <div class="card">
+      <h2>4. 화면 구성</h2>
+      <p>MVP에 필요한 핵심 화면 5개와 각 화면의 주요 요소입니다.</p>
+      
+      <table>
+        <tr><th>화면</th><th>주요 요소</th><th>기능</th></tr>
+        <tr>
+          <td><b>1. 로딩 화면</b></td>
+          <td>
+            • 앱 로고<br>
+            • 버전 정보<br>
+            • 로딩 인디케이터
+          </td>
+          <td>
+            • 앱 초기화<br>
+            • 데이터 로드<br>
+            • 온보딩 여부 확인
+          </td>
+        </tr>
+        <tr>
+          <td><b>2. 메인 타이머 화면</b></td>
+          <td>
+            • 스노우볼 테라리움 배경<br>
+            • 요정 애니메이션<br>
+            • 타이머 (25:00)<br>
+            • 시작/중지 버튼<br>
+            • 하단 네비게이션 바
+          </td>
+          <td>
+            • 뽀모도로 실행/중지<br>
+            • 요정 상태 실시간 표시<br>
+            • 오늘 달성 현황 (2/2 완료)
+          </td>
+        </tr>
+        <tr>
+          <td><b>3. 캐릭터 상태창</b></td>
+          <td>
+            • 요정 확대 이미지<br>
+            • 레벨 & 경험치 바<br>
+            • 누적 통계 (총 뽀모도로, 성공률)<br>
+            • 성장 진행도 (21/60)<br>
+            • 졸업까지 남은 일수
+          </td>
+          <td>
+            • 메인 화면에서 요정 탭 시 팝업<br>
+            • 성장 현황 확인<br>
+            • 동기 부여 ("75% 달성!")
+          </td>
+        </tr>
+        <tr>
+          <td><b>4. 히스토리 창</b></td>
+          <td>
+            • 캘린더 뷰 (달성일 표시)<br>
+            • 일별 뽀모도로 개수<br>
+            • 카테고리별 통계 (Phase 2)<br>
+            • 총 집중 시간<br>
+            • 연속 달성일 (스트릭)
+          </td>
+          <td>
+            • 하단 네비게이션에서 접근<br>
+            • 성취감 시각화<br>
+            • 패턴 분석 (언제 잘하나?)
+          </td>
+        </tr>
+        <tr>
+          <td><b>5. 설정창</b></td>
+          <td>
+            • 뽀모도로 시간 설정 (25/5분)<br>
+            • 알림 설정<br>
+            • 카테고리 관리 (Phase 2)<br>
+            • 광고 제거 구매 버튼<br>
+            • 프로젝트 초기화 (경고)
+          </td>
+          <td>
+            • 하단 네비게이션에서 접근<br>
+            • 사운드 on/off<br>
+            • 개인 정보 정책 링크
+          </td>
+        </tr>
+      </table>
+
+      <h3>📱 하단 네비게이션 구성</h3>
+      <div class="example">
+        <b>4개 탭:</b><br>
+        🏠 홈 (타이머) | 📊 히스토리 | 🛍️ 상점 | ⚙️ 설정
+      </div>
+
+      <h3>🛍️ 상점 화면 (Phase 1 간소화)</h3>
+      <table>
+        <tr><th>항목</th><th>Phase 1</th><th>Phase 3 확장</th></tr>
+        <tr>
+          <td>광고 제거</td>
+          <td>✅ $2.99</td>
+          <td>동일</td>
+        </tr>
+        <tr>
+          <td>성장 부스트</td>
+          <td>❌ 미제공</td>
+          <td>✅ 레벨당 1개 제한</td>
+        </tr>
+        <tr>
+          <td>정원 꾸미기</td>
+          <td>❌ 미제공</td>
+          <td>✅ 장식 아이템 10종</td>
+        </tr>
+      </table>
+      <p class="muted caption">Phase 1에서는 광고 제거만 제공하여 스코프 최소화</p>
+    </div>
+
+    <!-- 5. 데이터 모델 상세 -->
+    <div class="card">
+      <h2>5. 데이터 모델 상세</h2>
+      <p>로컬 DB(Hive/SQLite)에 저장되는 핵심 데이터 구조입니다.</p>
+
+      <h3>📦 테이블 구조</h3>
+      
+      <h4>1️⃣ Project (프로젝트 설정)</h4>
+      <table>
+        <tr><th>필드</th><th>타입</th><th>설명</th><th>예시</th></tr>
+        <tr><td>id</td><td>String</td><td>프로젝트 고유 ID</td><td>"proj_001"</td></tr>
+        <tr><td>duration_days</td><td>int</td><td>목표 기간</td><td>30</td></tr>
+        <tr><td>daily_goal</td><td>int</td><td>하루 목표 뽀모도로</td><td>2</td></tr>
+        <tr><td>start_date</td><td>DateTime</td><td>시작일</td><td>2025-01-01</td></tr>
+        <tr><td>end_date</td><td>DateTime</td><td>종료 예정일</td><td>2025-01-31</td></tr>
+        <tr><td>is_active</td><td>bool</td><td>진행 중 여부</td><td>true</td></tr>
+      </table>
+
+      <h4>2️⃣ Fairy (요정 상태)</h4>
+      <table>
+        <tr><th>필드</th><th>타입</th><th>설명</th><th>예시</th></tr>
+        <tr><td>id</td><td>String</td><td>요정 고유 ID</td><td>"fairy_001"</td></tr>
+        <tr><td>project_id</td><td>String</td><td>연결된 프로젝트</td><td>"proj_001"</td></tr>
+        <tr><td>level</td><td>int</td><td>현재 레벨 (1~4)</td><td>3</td></tr>
+        <tr><td>total_pomodoros</td><td>int</td><td>누적 완료 개수</td><td>42</td></tr>
+        <tr><td>color</td><td>String</td><td>선택한 색상 (Phase 2)</td><td>"mint"</td></tr>
+        <tr><td>dominant_tag</td><td>String</td><td>타입 (Phase 2)</td><td>"study"</td></tr>
+        <tr><td>is_sleeping</td><td>bool</td><td>잠든 상태</td><td>false</td></tr>
+        <tr><td>last_active</td><td>DateTime</td><td>마지막 활동일</td><td>2025-01-15</td></tr>
+      </table>
+
+      <h4>3️⃣ Session (세션 기록)</h4>
+      <table>
+        <tr><th>필드</th><th>타입</th><th>설명</th><th>예시</th></tr>
+        <tr><td>id</td><td>String</td><td>세션 고유 ID</td><td>"sess_001"</td></tr>
+        <tr><td>project_id</td><td>String</td><td>연결된 프로젝트</td><td>"proj_001"</td></tr>
+        <tr><td>date</td><td>DateTime</td><td>완료 일시</td><td>2025-01-15 14:30</td></tr>
+        <tr><td>duration_seconds</td><td>int</td><td>실제 집중 시간</td><td>1500 (25분)</td></tr>
+        <tr><td>is_success</td><td>bool</td><td>성공 여부 (≥80%)</td><td>true</td></tr>
+        <tr><td>category</td><td>String</td><td>카테고리 (Phase 2)</td><td>"study"</td></tr>
+      </table>
+
+      <h4>4️⃣ Gallery (도감)</h4>
+      <table>
+        <tr><th>필드</th><th>타입</th><th>설명</th><th>예시</th></tr>
+        <tr><td>id</td><td>String</td><td>도감 항목 ID</td><td>"gallery_001"</td></tr>
+        <tr><td>fairy_id</td><td>String</td><td>졸업한 요정 ID</td><td>"fairy_001"</td></tr>
+        <tr><td>completed_date</td><td>DateTime</td><td>졸업 일시</td><td>2025-01-31</td></tr>
+        <tr><td>final_level</td><td>int</td><td>최종 레벨</td><td>4</td></tr>
+        <tr><td>success_rate</td><td>float</td><td>성공률</td><td>0.85</td></tr>
+        <tr><td>total_time_hours</td><td>float</td><td>총 집중 시간</td><td>25.5</td></tr>
+        <tr><td>screenshot</td><td>String</td><td>스크린샷 경로 (선택)</td><td>"img/fairy_001.png"</td></tr>
+      </table>
+
+      <div class="hr"></div>
+
+      <h3>🔗 데이터 관계도 (텍스트)</h3>
+      <pre class="kbd" style="background:#1e293b;color:#e2e8f0;padding:16px;line-height:1.6;overflow-x:auto;">
+┌─────────────────┐
+│   Project       │ 1:1 연결
+│  (목표 설정)    ├──────────┐
+└─────────────────┘          │
+                             ▼
+                    ┌─────────────────┐
+                    │     Fairy       │
+                    │   (요정 상태)   │
+                    └────────┬────────┘
+                             │ 1:N 연결
+                             ▼
+                    ┌─────────────────┐
+                    │    Session      │
+                    │  (세션 기록)    │
+                    └─────────────────┘
+                             │
+                    졸업 시 복사 ▼
+                    ┌─────────────────┐
+                    │    Gallery      │
+                    │     (도감)      │
+                    └─────────────────┘
+      </pre>
+
+      <h3>🔢 핵심 계산 로직</h3>
+      <div class="example">
+        <b>1. 현재 레벨 계산:</b><br>
+        <span class="kbd">level = min(4, 1 + total_pomodoros // (project.daily_goal * project.duration_days / 4))</span><br><br>
+        
+        <b>2. 하루 달성 여부:</b><br>
+        <span class="kbd">today_sessions = Session.filter(date == today).count()</span><br>
+        <span class="kbd">is_achieved = today_sessions >= project.daily_goal</span><br><br>
+        
+        <b>3. 졸업 가능 여부:</b><br>
+        <span class="kbd">can_graduate = (</span><br>
+        <span class="kbd">  fairy.total_pomodoros >= project.daily_goal * project.duration_days</span><br>
+        <span class="kbd">  AND days_since_start >= project.duration_days</span><br>
+        <span class="kbd">  AND fairy.level >= 4</span><br>
+        <span class="kbd">)</span><br><br>
+        
+        <b>4. 잠든 상태 판정:</b><br>
+        <span class="kbd">is_sleeping = (today - fairy.last_active).days >= 10</span>
+      </div>
+    </div>
+
+    <!-- 6. FAQ & 엣지 케이스 -->
+    <div class="card">
+      <h2>6. FAQ & 엣지 케이스 처리</h2>
+      <p>개발 중 자주 나올 질문과 예외 상황 처리 방법입니다.</p>
+
+      <h3>❓ 자주 묻는 질문</h3>
+      
+      <table>
+        <tr><th>질문</th><th>답변</th></tr>
+        <tr>
+          <td><b>Q1. 중간에 목표를 변경할 수 있나요?</b></td>
+          <td>
+            <b>Phase 1:</b> 불가능. 프로젝트 시작 시 확정.<br>
+            <b>Phase 2 이후:</b> 설정에서 "프로젝트 재시작" 가능 (데이터 초기화 경고)
+          </td>
+        </tr>
+        <tr>
+          <td><b>Q2. 여러 프로젝트를 동시에 진행할 수 있나요?</b></td>
+          <td>
+            <b>Phase 1:</b> 불가능. 1개 프로젝트만 활성화.<br>
+            <b>Phase 3 이후:</b> 멀티 프로젝트 지원 검토 (복잡도 증가)
+          </td>
+        </tr>
+        <tr>
+          <td><b>Q3. 앱을 삭제했다가 재설치하면?</b></td>
+          <td>
+            로컬 DB만 사용하므로 데이터 소실.<br>
+            <b>Phase 2 이후:</b> Firebase 백업 옵션 제공 검토
+          </td>
+        </tr>
+        <tr>
+          <td><b>Q4. 자정이 지나면 "하루 목표"가 리셋되나요?</b></td>
+          <td>
+            네. 디바이스 로컬 타임존 기준 00:00에 리셋.<br>
+            타임존 변경 시: 새 타임존의 자정 기준 적용
+          </td>
+        </tr>
+        <tr>
+          <td><b>Q5. 25분 안에 앱을 끄면?</b></td>
+          <td>
+            백그라운드 타이머 동작 (OS 허용 시).<br>
+            80% 미만 경과 시 실패 처리, 세션 기록 안됨.
+          </td>
+        </tr>
+      </table>
+
+      <div class="hr"></div>
+
+      <h3>⚠️ 엣지 케이스 처리</h3>
+
+      <h4>1. 목표 초과 달성</h4>
+      <div class="example">
+        <b>상황:</b> 30일 목표인데 20일 만에 60개 달성<br>
+        <b>처리:</b><br>
+        • 20일차에 "조기 졸업 가능" 알림<br>
+        • 유저가 "졸업" 버튼 클릭 시 도감 등록<br>
+        • 남은 10일은 보너스 기간 (선택적 계속 가능)
+      </div>
+
+      <h4>2. 목표 미달성</h4>
+      <div class="example">
+        <b>상황:</b> 30일 지났는데 40개만 달성 (목표 60개)<br>
+        <b>처리:</b><br>
+        • "목표를 달성하지 못했습니다" 메시지<br>
+        • 도감 등록 불가 (회색으로 표시)<br>
+        • 옵션 1: 프로젝트 연장 (+7일)<br>
+        • 옵션 2: 새 프로젝트 시작 (현재 포기)
+      </div>
+
+      <h4>3. 앱 권한 거부</h4>
+      <div class="example">
+        <b>상황:</b> 알림 권한 거부<br>
+        <b>처리:</b><br>
+        • 앱은 정상 작동 (알림 없이)<br>
+        • 설정에서 "알림 권한 요청" 버튼 표시<br>
+        • 타이머 종료 시 앱 내 팝업으로 알림 대체
+      </div>
+
+      <h4>4. 날짜/시간 조작</h4>
+      <div class="example">
+        <b>상황:</b> 유저가 디바이스 시간을 앞으로 돌림<br>
+        <b>처리:</b><br>
+        • 서버 시간 없이 완벽한 방어 불가<br>
+        • Phase 1: 조작 허용 (1인 게임이므로 큰 문제 없음)<br>
+        • Phase 3: 서버 타임스탬프 검증 추가 검토
+      </div>
+
+      <h4>5. 타이머 중 앱 크래시</h4>
+      <div class="example">
+        <b>상황:</b> 타이머 실행 중 앱 강제 종료<br>
+        <b>처리:</b><br>
+        • 재시작 시 "중단된 세션" 감지<br>
+        • "이어하기" vs "포기" 선택지 제공<br>
+        • 이어하기: 남은 시간부터 재시작<br>
+        • 포기: 세션 기록 안됨
+      </div>
+
+      <h4>6. 졸업 후 데이터</h4>
+      <div class="example">
+        <b>상황:</b> 졸업한 요정은 어떻게 되나요?<br>
+        <b>처리:</b><br>
+        • Fairy 데이터 → Gallery로 복사<br>
+        • 원본 Fairy 데이터는 보관 (히스토리 참조용)<br>
+        • Project.is_active = false 처리<br>
+        • 새 프로젝트 시작 시 새 Fairy 생성
+      </div>
+
+      <p class="muted caption">⚠️ 위 엣지 케이스는 Phase 1에서 모두 구현할 필요는 없습니다. 출시 후 유저 피드백에 따라 우선순위를 조정하세요.</p>
+    </div>
+
+
     <!-- 3. 목표 설정 시스템 (NEW) -->
     <div class="card">
-      <h2>3. 목표 설정 시스템 ⭐ 핵심</h2>
+      <h2>7. 목표 설정 시스템 ⭐ 핵심</h2>
       <p>유저가 앱 시작 시 <b>자신의 목표</b>를 직접 설정합니다.</p>
       
       <h3>설정 흐름</h3>
@@ -178,7 +501,7 @@
 
     <!-- 4. 성장 시스템 (UPDATED) -->
     <div class="card">
-      <h2>4. 성장 시스템</h2>
+      <h2>8. 성장 시스템</h2>
       <p>성장은 <b>뽀모도로 달성 개수</b>로만 결정됩니다. 시간이 지나도 목표를 달성하지 않으면 성장하지 않습니다.</p>
       
       <h3>레벨업 조건 (30일 기준 예시)</h3>
@@ -202,7 +525,7 @@
 
     <!-- 5. 뽀모도로 시스템 -->
     <div class="card">
-      <h2>5. 뽀모도로 시스템</h2>
+      <h2>9. 뽀모도로 시스템</h2>
       <table>
         <tr><th>항목</th><th>내용</th></tr>
         <tr><td>타이머</td><td>25분 집중 / 5분 휴식 (기본)</td></tr>
@@ -215,7 +538,7 @@
 
     <!-- 6. 방치 시스템 -->
     <div class="card">
-      <h2>6. 방치 & 복귀 시스템</h2>
+      <h2>10. 방치 & 복귀 시스템</h2>
       <table>
         <tr><th>상태</th><th>조건</th><th>연출</th></tr>
         <tr><td>정상</td><td>10일 이내 접속</td><td>요정 활발히 움직임</td></tr>
@@ -228,7 +551,7 @@
 
     <!-- 7. IAP: 정원 아이템 -->
     <div class="card">
-      <h2>7. IAP: 정원 아이템 (성장 부스트)</h2>
+      <h2>11. IAP: 정원 아이템 (성장 부스트)</h2>
       <p>목표 달성에 어려움을 겪는 유저를 위한 <b>선택적 도움</b> 아이템입니다.</p>
       
       <table>
@@ -248,7 +571,7 @@
 
     <!-- 8. 도감 & 졸업 시스템 -->
     <div class="card">
-      <h2>8. 도감 & 졸업 시스템</h2>
+      <h2>12. 도감 & 졸업 시스템</h2>
       <p>프로젝트 기간(15/30/60일)이 끝나고 목표를 달성하면 요정이 <b>졸업</b>합니다.</p>
       
       <h3>졸업 조건</h3>
@@ -277,7 +600,7 @@
 
     <!-- 9. 기술 스펙 -->
     <div class="card">
-      <h2>9. 기술 스펙 (MVP)</h2>
+      <h2>13. 기술 스펙 (MVP)</h2>
       <div class="grid cols-2">
         <div>
           <h3>플랫폼/엔진</h3>
@@ -312,7 +635,7 @@
 
     <!-- 10. 로드맵 & Phase 2/3 계획 -->
     <div class="card">
-      <h2>10. 개발 로드맵 & Phase 계획</h2>
+      <h2>14. 개발 로드맵 & Phase 계획</h2>
       <p class="muted">MVP(Phase 1)로 핵심 루프를 검증한 후, 유저 피드백에 따라 단계적으로 기능을 확장합니다.</p>
       
       <table>
@@ -444,7 +767,7 @@
 
     <!-- 11. MVP 개발 스펙 -->
     <div class="card" style="background:linear-gradient(135deg, #ecfeff 0%, #fff 100%);">
-      <h2>11. 📌 MVP 개발 스펙 — Phase 1 (2주 목표)</h2>
+      <h2>15. 📌 MVP 개발 스펙 — Phase 1 (2주 목표)</h2>
       <p class="muted">핵심 루프 1사이클을 완성하여 유저 피드백을 받을 수 있는 최소 버전</p>
       
       <div class="grid cols-3">
