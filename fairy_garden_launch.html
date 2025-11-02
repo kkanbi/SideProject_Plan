@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fairy Garden MVP 런칭 스케줄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #A6E3B7 0%, #CDE6F7 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #A6E3B7 0%, #7AA88C 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .mvp-badge {
+            display: inline-block;
+            background: #ffd700;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #7AA88C;
+            color: #7AA88C;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 타임라인 스타일 */
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, #A6E3B7, #7AA88C);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 50px;
+            width: 45%;
+        }
+
+        .timeline-item:nth-child(odd) {
+            left: 0;
+            text-align: right;
+            padding-right: 40px;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 55%;
+            text-align: left;
+            padding-left: 40px;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .timeline-content.mvp-phase {
+            background: linear-gradient(135deg, #A6E3B7 0%, #7AA88C 100%);
+            color: white;
+            border: 3px solid #ffd700;
+        }
+
+        .timeline-content.launch-phase {
+            background: linear-gradient(135deg, #CDE6F7 0%, #667eea 100%);
+            color: white;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #7AA88C;
+            border-radius: 50%;
+            top: 0;
+        }
+
+        .timeline-dot.mvp {
+            background: #ffd700;
+            border-color: #ffa500;
+            width: 24px;
+            height: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -10px;
+        }
+
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -10px;
+        }
+
+        .timeline-date {
+            font-weight: bold;
+            color: #7AA88C;
+            margin-bottom: 10px;
+        }
+
+        .mvp-phase .timeline-date,
+        .launch-phase .timeline-date {
+            color: #ffd700;
+        }
+
+        .timeline-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .timeline-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .mvp-phase .timeline-desc,
+        .launch-phase .timeline-desc {
+            color: #fff;
+            opacity: 0.95;
+        }
+
+        /* 간트 차트 스타일 */
+        .gantt-chart {
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .gantt-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .gantt-label {
+            width: 200px;
+            font-weight: 600;
+            padding-right: 20px;
+        }
+
+        .gantt-bar-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            height: 40px;
+        }
+
+        .gantt-bar {
+            height: 100%;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .gantt-bar.dev {
+            background: linear-gradient(135deg, #A6E3B7, #7AA88C);
+        }
+
+        .gantt-bar.art {
+            background: linear-gradient(135deg, #ffb7c5, #ff9ebb);
+        }
+
+        .gantt-bar.test {
+            background: linear-gradient(135deg, #CDE6F7, #667eea);
+        }
+
+        .gantt-bar.launch {
+            background: linear-gradient(135deg, #F7E7A9, #f59e0b);
+        }
+
+        /* 체크리스트 */
+        .checklist {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .checklist-section {
+            margin-bottom: 30px;
+        }
+
+        .checklist-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #7AA88C;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checklist-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        /* 마케팅 전략 */
+        .marketing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .marketing-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #7AA88C;
+        }
+
+        .marketing-card h3 {
+            color: #7AA88C;
+            margin-bottom: 15px;
+        }
+
+        .marketing-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .marketing-card li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .marketing-card li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #7AA88C;
+            font-weight: bold;
+        }
+
+        /* 오버레이 & 툴팁 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .tooltip.show {
+            display: block;
+        }
+
+        .tooltip-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .tooltip-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #7AA88C;
+        }
+
+        .tooltip-content {
+            line-height: 1.6;
+            color: #666;
+        }
+    
+        /* 캘린더 스타일 */
+        .calendar-container {
+            display: grid;
+            gap: 30px;
+        }
+
+        .calendar-month {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .calendar-month-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #7AA88C;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #A6E3B7;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .calendar-day-number {
+            font-size: 1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .calendar-event {
+            font-size: 0.7em;
+            text-align: center;
+            line-height: 1.2;
+            color: #666;
+            background: #e8f5e9;
+            padding: 4px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .calendar-day.has-event {
+            background: linear-gradient(135deg, #E8F9FF, #fff);
+            border: 2px solid #A6E3B7;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                gap: 4px;
+            }
+            .calendar-day {
+                min-height: 50px;
+                padding: 4px;
+            }
+            .calendar-event {
+                font-size: 0.6em;
+            }
+        }
+
+        /* 일정 추가 폼 */
+        .event-form {
+            position: fixed;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .event-form.show {
+            display: block;
+        }
+
+        .event-form-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #7AA88C;
+        }
+
+        .event-form-group {
+            margin-bottom: 15px;
+        }
+
+        .event-form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .event-form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .event-form-input:focus {
+            outline: none;
+            border-color: #A6E3B7;
+        }
+
+        .event-form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .event-form-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .event-form-button.primary {
+            background: #A6E3B7;
+            color: white;
+        }
+
+        .event-form-button.primary:hover {
+            background: #7AA88C;
+        }
+
+        .event-form-button.secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .event-form-button.secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .calendar-day.empty {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .calendar-day.empty:hover {
+            opacity: 1;
+            background: #f0f9ff;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧚 Fairy Garden MVP 런칭 스케줄</h1>
+            <p class="subtitle">뽀모도로 × 요정 성장 힐링 앱</p>
+            <span class="mvp-badge">⚡ 슈퍼 미니멀 MVP · 2개월 완성</span>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showView('timeline')">📅 타임라인</div>
+            <div class="tab" onclick="showView('gantt')">📊 간트 차트</div>
+            <div class="tab" onclick="showView('calendar')">📆 캘린더</div>
+            <div class="tab" onclick="showView('checklist')">✅ 체크리스트</div>
+            <div class="tab" onclick="showView('marketing')">📣 마케팅</div>
+        </div>
+
+        <div class="content">
+            <!-- 타임라인 뷰 -->
+            <div id="timeline" class="view active">
+                <div class="timeline">
+                    <!-- Week 1-2: Flutter 학습 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 1-2: Flutter 기초', '<strong>학습 목표:</strong><br>• Flutter 공식 튜토리얼 완주<br>• 샘플 앱 3개 만들기<br>• Hive DB 연동 실습<br><br><strong>체크포인트:</strong><br>• 간단한 타이머 앱 구현 가능<br>• 로컬 DB 저장/불러오기 이해')">
+                            <div class="timeline-date">Week 1-2 (11.01-11.14)</div>
+                            <div class="timeline-title">🎓 Flutter 기초 학습</div>
+                            <div class="timeline-desc">
+                                • Flutter 공식 튜토리얼<br>
+                                • 샘플 앱 3개 제작<br>
+                                • Hive DB 연동 실습
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 3: 타이머 구현 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 3: 타이머 구현', '<strong>개발 내용:</strong><br>• 25분 카운트다운<br>• 시작/일시정지/리셋 버튼<br>• 백그라운드 동작<br>• 80% 성공 판정<br><br><strong>기술:</strong><br>• Timer 클래스<br>• 상태 관리 (Provider or Riverpod)')">
+                            <div class="timeline-date">Week 3 (11.15-11.21)</div>
+                            <div class="timeline-title">⏱️ 타이머 핵심 구현</div>
+                            <div class="timeline-desc">
+                                • 25분 카운트다운 로직<br>
+                                • 백그라운드 동작<br>
+                                • 성공 판정 (≥80%)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 4: DB + 온보딩 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 4: 데이터베이스 + 온보딩', '<strong>개발 내용:</strong><br>• Project 테이블<br>• Fairy 테이블<br>• Session 테이블<br>• 목표 설정 UI (기간, 하루 목표)<br><br><strong>UI:</strong><br>• 온보딩 3장 슬라이드<br>• 목표 선택 휠/버튼')">
+                            <div class="timeline-date">Week 4 (11.22-11.28)</div>
+                            <div class="timeline-title">💾 데이터베이스 + 온보딩</div>
+                            <div class="timeline-desc">
+                                • Hive 테이블 설계<br>
+                                • Project, Fairy, Session<br>
+                                • 목표 설정 UI 완성
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 5: 성장 로직 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 5: 성장 로직', '<strong>개발 내용:</strong><br>• 레벨 계산 공식 구현<br>• 뽀모도로 완료 → 카운트 증가<br>• 레벨업 체크 & 연출<br>• 메인 화면 진행도 표시<br><br><strong>테스트:</strong><br>• 15개, 30개, 45개 달성 시 레벨업 확인')">
+                            <div class="timeline-date">Week 5 (11.29-12.05)</div>
+                            <div class="timeline-title">📈 성장 로직 구현</div>
+                            <div class="timeline-desc">
+                                • 레벨 계산 공식<br>
+                                • 진행도 표시 (42/60)<br>
+                                • 레벨업 연출
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 6: 도감 + 졸업 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 6: 도감 + 졸업 + 푸시알림', '<strong>개발 내용:</strong><br>• Gallery 테이블<br>• 졸업 조건 체크<br>• 졸업 연출 (애니메이션)<br>• 도감 리스트 UI<br>• 새 프로젝트 시작 버튼<br><br><strong>⚠️ 추가 작업:</strong><br>• 푸시 알림 구현 (APNs, FCM)<br>• 타이머 완료 시 알림<br>• 백그라운드 알림 테스트<br><br><strong>1사이클 완주 테스트!</strong>')">
+                            <div class="timeline-date">Week 6 (12.06-12.12)</div>
+                            <div class="timeline-title">🎓 도감 + 졸업 시스템</div>
+                            <div class="timeline-desc">
+                                • Gallery 테이블<br>
+                                • 졸업 조건 & 연출<br>
+                                • 도감 UI 구현<br>
+                                <strong>🔔 푸시 알림 구현</strong><br>
+                                <strong>✅ 1사이클 완주!</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 7: AI 아트 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 7: AI 아트 생성', '<strong>작업:</strong><br>• Midjourney/DALL-E 구독<br>• 요정 4단계 프롬프트 작성<br>• 배경 이미지 생성<br>• 이미지 리터칭<br>• 앱에 통합<br><br><strong>팁:</strong><br>프롬프트: "cute fairy character level 1, chibi style, pastel mint colors, glass terrarium, white background"')">
+                            <div class="timeline-date">Week 7 (12.13-12.19)</div>
+                            <div class="timeline-title">🎨 AI 아트 생성 & 통합</div>
+                            <div class="timeline-desc">
+                                • Midjourney로 아트 생성<br>
+                                • 요정 4단계 + 배경<br>
+                                • 임시 이미지 → 실제 이미지 교체
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 8: 테스트 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot mvp"></div>
+                        <div class="timeline-content mvp-phase" onclick="showTooltip('Week 8: 테스트 + 법적 문서', '<strong>테스트 항목:</strong><br>• 친구 3명 테스트<br>• 크래시 수정<br>• 엣지 케이스 처리<br>• 성능 최적화<br>• 앱 아이콘 제작<br>• 스플래시 스크린<br><br><strong>⚠️ 법적 문서 (필수!):</strong><br>• 개인정보 처리방침<br>• 이용약관<br>• 지원 이메일 설정<br>• GitHub Pages로 호스팅<br><br><strong>iOS 추가:</strong><br>• 계정 삭제 기능<br>• 데이터 다운로드 (GDPR)')">
+                            <div class="timeline-date">Week 8 (12.20-12.26)</div>
+                            <div class="timeline-title">🐛 테스트 & 법적 문서</div>
+                            <div class="timeline-desc">
+                                • 친구 3명 베타 테스트<br>
+                                • 크래시 수정<br>
+                                • 앱 아이콘 제작<br>
+                                <strong>📄 법적 문서 3종</strong><br>
+                                <strong>🍎 iOS 특수 요구사항</strong><br>
+                                <strong>✅ MVP 개발 완료!</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 9: 스토어 준비 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 9: 스토어 제출 준비', '<strong>준비 사항:</strong><br><br><strong>iOS (App Store):</strong><br>• Apple Developer 등록 ($99/년)<br>• 스크린샷 5장<br>• 앱 설명 작성<br>• 개인정보 처리방침<br><br><strong>Android (Google Play):</strong><br>• Developer 계정 ($25 1회)<br>• 스크린샷 8장<br>• 피처 그래픽<br>• 앱 설명')">
+                            <div class="timeline-date">Week 9 (12.27-01.02)</div>
+                            <div class="timeline-title">📱 스토어 제출 준비</div>
+                            <div class="timeline-desc">
+                                • 스크린샷 5-8장 제작<br>
+                                • 앱 설명 작성 (ASO)<br>
+                                • 개인정보 처리방침<br>
+                                • Developer 계정 등록
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 10: 스토어 제출 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 10: 스토어 제출', '<strong>제출 프로세스:</strong><br><br><strong>iOS:</strong><br>• TestFlight 업로드<br>• 심사 제출 (2-7일 소요)<br><br><strong>Android:</strong><br>• 내부 테스트 → 비공개 테스트<br>• 심사 제출 (1-3일 소요)<br><br><strong>거절 대비:</strong><br>• 가이드라인 재확인<br>• 수정 후 재제출')">
+                            <div class="timeline-date">Week 10 (01.03-01.09)</div>
+                            <div class="timeline-title">🚀 스토어 제출</div>
+                            <div class="timeline-desc">
+                                • iOS App Store 제출<br>
+                                • Google Play 제출<br>
+                                • 심사 대기 (2-7일)<br>
+                                ⏳ 승인 대기 중...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 11: 소프트 런칭 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 11: 심사 & 재제출', '<strong>스토어 심사:</strong><br>• iOS 심사 (2-7일)<br>• Android 심사 (1-3일)<br>• 거절 시 즉시 수정 & 재제출<br><br><strong>흔한 거절 사유:</strong><br>• 개인정보 처리방침 링크 오류<br>• 기능 불명확<br>• 스크린샷 문제<br><br><strong>대비책:</strong><br>• 가이드라인 재확인<br>• 2-3일 내 재제출')">
+                            <div class="timeline-date">Week 11 (01.10-01.16)</div>
+                            <div class="timeline-title">⏳ 심사 & 재제출 버퍼</div>
+                            <div class="timeline-desc">
+                                • 스토어 심사 대기<br>
+                                • 거절 시 재제출<br>
+                                • 승인 확인<br>
+                                ⚠️ 거절률 30% 대비
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 12: 공식 런칭 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 12: 소프트 런칭', '<strong>소프트 런칭:</strong><br>• 지인/친구 20-30명<br>• 작은 커뮤니티 테스트<br>• 크리티컬 버그 모니터링<br>• 초기 피드백 수집<br><br><strong>목표:</strong><br>• 최초 50명 확보<br>• 버그 신속 대응<br>• D1 Retention 측정')">
+                            <div class="timeline-date">Week 12 (01.17-01.23)</div>
+                            <div class="timeline-title">🎯 소프트 런칭</div>
+                            <div class="timeline-desc">
+                                • 지인 20-30명 공유<br>
+                                • 작은 커뮤니티<br>
+                                • 버그 모니터링<br>
+                                🎯 목표: 50명
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Week 13: 공식 런칭 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 13: 공식 런칭 🎉', '<strong>런칭 채널:</strong><br>• Product Hunt 등록<br>• 앱테크 커뮤니티 (뽐뿌, 클리앙)<br>• 생산성 앱 커뮤니티<br>• 네이버 카페 (자기계발)<br>• SNS (#뽀모도로)<br><br><strong>KPI 목표:</strong><br>• D1 Retention ≥ 35%<br>• 첫 주 100-200 DL<br>• 리뷰 5개 이상')">
+                            <div class="timeline-date">Week 13 (01.24-01.30)</div>
+                            <div class="timeline-title">🎉 공식 런칭!</div>
+                            <div class="timeline-desc">
+                                • Product Hunt 등록<br>
+                                • 커뮤니티 홍보<br>
+                                • 리뷰어 컨택<br>
+                                🎯 목표: 첫 주 100-200 DL
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Week 14: 버퍼 -->
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content launch-phase" onclick="showTooltip('Week 14: 버퍼 & 모니터링', '<strong>모니터링:</strong><br>• D1/D7 Retention 추적<br>• 크래시 모니터링<br>• 유저 피드백 수집<br>• 리뷰 대응<br><br><strong>판단 기준:</strong><br>• D1 ≥35%: Phase 2 진행<br>• D1 30-35%: 소폭 개선 후 Phase 2<br>• D1 <30%: 컨셉 재검토')">
+                            <div class="timeline-date">Week 14 (01.31-02.06)</div>
+                            <div class="timeline-title">🛡️ 버퍼 & 모니터링</div>
+                            <div class="timeline-desc">
+                                • 예상치 못한 문제 대응<br>
+                                • KPI 분석<br>
+                                • Phase 2 판단<br>
+                                📊 D1 Retention 35% 달성?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 간트 차트 뷰 -->
+            <div id="gantt" class="view">
+                <h2 style="margin-bottom: 30px;">📊 14주 개발 & 런칭 타임라인</h2>
+                <div class="gantt-chart">
+                    <div class="gantt-row">
+                        <div class="gantt-label">Flutter 학습</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar dev" style="width: 16.6%; margin-left: 0;">Week 1-2</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">타이머 구현</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar dev" style="width: 8.3%; margin-left: 16.6%;">Week 3</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">DB + 온보딩</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar dev" style="width: 8.3%; margin-left: 25%;">Week 4</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">성장 로직</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar dev" style="width: 8.3%; margin-left: 33.3%;">Week 5</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">도감 + 졸업</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar dev" style="width: 8.3%; margin-left: 41.6%;">Week 6</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">AI 아트 생성</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar art" style="width: 8.3%; margin-left: 50%;">Week 7</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">테스트 & 디버깅</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar test" style="width: 8.3%; margin-left: 58.3%;">Week 8</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">스토어 준비</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 8.3%; margin-left: 66.6%;">Week 9</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">스토어 제출</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 8.3%; margin-left: 75%;">Week 10</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">소프트 런칭</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 8.3%; margin-left: 83.3%;">Week 11</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">소프트 런칭</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 7.14%; margin-left: 78.56%;">Week 12</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">공식 런칭 🎉</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 7.14%; margin-left: 85.7%;">Week 13</div>
+                        </div>
+                    </div>
+                    <div class="gantt-row">
+                        <div class="gantt-label">버퍼 & 모니터링</div>
+                        <div class="gantt-bar-container">
+                            <div class="gantt-bar launch" style="width: 7.14%; margin-left: 92.84%;">Week 14</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h3>📅 주요 마일스톤 (2025.11 ~ 2026.02)</h3>
+                    <ul style="line-height: 2;">
+                        <li><strong>11.14 (Week 2):</strong> ✅ Flutter 학습 완료</li>
+                        <li><strong>12.12 (Week 6):</strong> ✅ 1사이클 완주 + 푸시알림</li>
+                        <li><strong>12.26 (Week 8):</strong> ✅ MVP 개발 완료 + 법적문서</li>
+                        <li><strong>01.09 (Week 10):</strong> 🚀 스토어 제출</li>
+                        <li><strong>01.23 (Week 12):</strong> 🎯 소프트 런칭 (50명)</li>
+                        <li><strong>01.30 (Week 13):</strong> 🎉 공식 런칭 (100-200 DL)</li>
+                        <li><strong>02.06 (Week 14):</strong> 📊 Phase 2 판단</li>
+                    </ul>
+                </div>
+            </div>
+
+            
+            <!-- 캘린더 뷰 -->
+            <div id="calendar" class="view">
+                <h2 style="margin-bottom: 30px;">📆 14주 캘린더 (2025.11.01 ~ 2026.02.06)</h2>
+                
+                <div class="calendar-container">
+                    <!-- 11월 -->
+                    <div class="calendar-month">
+                        <div class="calendar-month-title">2025년 11월 - Flutter 학습 & 타이머</div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">일</div>
+                            <div class="calendar-day-header">월</div>
+                            <div class="calendar-day-header">화</div>
+                            <div class="calendar-day-header">수</div>
+                            <div class="calendar-day-header">목</div>
+                            <div class="calendar-day-header">금</div>
+                            <div class="calendar-day-header">토</div>
+                            
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day has-event" style="background: linear-gradient(135deg, #A6E3B7, #7AA88C); color: white; border: none;">
+                                <div class="calendar-day-number" style="color: white;">1</div>
+                                <div class="calendar-event" style="background: rgba(255,255,255,0.3); color: white;">🎓 Week 1<br>Flutter 학습</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">2</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">3</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">4</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">5</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">6</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">7</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">8</div>
+                                <div class="calendar-event">Week 2</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">9</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">10</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">11</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">12</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">13</div></div>
+                            <div class="calendar-day has-event" style="background: #ffd700;">
+                                <div class="calendar-day-number">14</div>
+                                <div class="calendar-event">✅ Flutter 완료</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">15</div>
+                                <div class="calendar-event">⏱️ Week 3<br>타이머</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">16</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">17</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">18</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">19</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">20</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">21</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">22</div>
+                                <div class="calendar-event">💾 Week 4<br>DB</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">23</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">24</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">25</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">26</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">27</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">28</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">29</div>
+                                <div class="calendar-event">📈 Week 5<br>성장 로직</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">30</div></div>
+                        </div>
+                    </div>
+
+                    <!-- 12월 -->
+                    <div class="calendar-month">
+                        <div class="calendar-month-title">2025년 12월 - 핵심 기능 완성</div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">일</div>
+                            <div class="calendar-day-header">월</div>
+                            <div class="calendar-day-header">화</div>
+                            <div class="calendar-day-header">수</div>
+                            <div class="calendar-day-header">목</div>
+                            <div class="calendar-day-header">금</div>
+                            <div class="calendar-day-header">토</div>
+                            
+                            <div class="calendar-day"><div class="calendar-day-number">1</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">2</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">3</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">4</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">5</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">6</div>
+                                <div class="calendar-event">🎓 Week 6<br>도감+푸시</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">7</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">8</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">9</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">10</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">11</div></div>
+                            <div class="calendar-day has-event" style="background: #ffd700;">
+                                <div class="calendar-day-number">12</div>
+                                <div class="calendar-event">🎉 1사이클<br>완주!</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">13</div>
+                                <div class="calendar-event">🎨 Week 7<br>AI 아트</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">14</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">15</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">16</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">17</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">18</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">19</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">20</div>
+                                <div class="calendar-event">🐛 Week 8<br>테스트+법적</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">21</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">22</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">23</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">24</div></div>
+                            <div class="calendar-day has-event" style="background: #ffb7c5;">
+                                <div class="calendar-day-number">25</div>
+                                <div class="calendar-event">🎄 크리스마스</div>
+                            </div>
+                            <div class="calendar-day has-event" style="background: linear-gradient(135deg, #A6E3B7, #7AA88C); color: white; border: none;">
+                                <div class="calendar-day-number" style="color: white;">26</div>
+                                <div class="calendar-event" style="background: rgba(255,255,255,0.3); color: white;">✅ MVP<br>개발 완료!</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">27</div>
+                                <div class="calendar-event">📱 Week 9<br>스토어 준비</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">28</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">29</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">30</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">31</div></div>
+                        </div>
+                    </div>
+
+                    <!-- 1월 -->
+                    <div class="calendar-month">
+                        <div class="calendar-month-title">2026년 1월 - 스토어 제출 & 런칭</div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">일</div>
+                            <div class="calendar-day-header">월</div>
+                            <div class="calendar-day-header">화</div>
+                            <div class="calendar-day-header">수</div>
+                            <div class="calendar-day-header">목</div>
+                            <div class="calendar-day-header">금</div>
+                            <div class="calendar-day-header">토</div>
+                            
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day"></div>
+                            <div class="calendar-day has-event" style="background: #ffb7c5;">
+                                <div class="calendar-day-number">1</div>
+                                <div class="calendar-event">🎉 새해</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">2</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">3</div>
+                                <div class="calendar-event">🚀 Week 10<br>스토어 제출</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">4</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">5</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">6</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">7</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">8</div></div>
+                            <div class="calendar-day has-event" style="background: #CDE6F7;">
+                                <div class="calendar-day-number">9</div>
+                                <div class="calendar-event">⏳ 심사 대기</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">10</div>
+                                <div class="calendar-event">⏳ Week 11<br>심사/재제출</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">11</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">12</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">13</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">14</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">15</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">16</div></div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">17</div>
+                                <div class="calendar-event">🎯 Week 12<br>소프트 런칭</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">18</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">19</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">20</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">21</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">22</div></div>
+                            <div class="calendar-day has-event" style="background: #ffd700;">
+                                <div class="calendar-day-number">23</div>
+                                <div class="calendar-event">✅ 50명!</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">24</div>
+                                <div class="calendar-event">🎉 Week 13<br>공식 런칭!</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">25</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">26</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">27</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">28</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">29</div></div>
+                            <div class="calendar-day has-event" style="background: #CDE6F7;">
+                                <div class="calendar-day-number">30</div>
+                                <div class="calendar-event">📊 200 DL?</div>
+                            </div>
+                            <div class="calendar-day has-event">
+                                <div class="calendar-day-number">31</div>
+                                <div class="calendar-event">🛡️ Week 14<br>버퍼</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2월 -->
+                    <div class="calendar-month">
+                        <div class="calendar-month-title">2026년 2월 - 안정화 & Phase 2 판단</div>
+                        <div class="calendar-grid">
+                            <div class="calendar-day-header">일</div>
+                            <div class="calendar-day-header">월</div>
+                            <div class="calendar-day-header">화</div>
+                            <div class="calendar-day-header">수</div>
+                            <div class="calendar-day-header">목</div>
+                            <div class="calendar-day-header">금</div>
+                            <div class="calendar-day-header">토</div>
+                            
+                            <div class="calendar-day"><div class="calendar-day-number">1</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">2</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">3</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">4</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">5</div></div>
+                            <div class="calendar-day has-event" style="background: linear-gradient(135deg, #CDE6F7, #667eea); color: white; border: none;">
+                                <div class="calendar-day-number" style="color: white;">6</div>
+                                <div class="calendar-event" style="background: rgba(255,255,255,0.3); color: white;">🎊 14주 완료!<br>Phase 2?</div>
+                            </div>
+                            <div class="calendar-day"><div class="calendar-day-number">7</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">8</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">9</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">10</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">11</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">12</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">13</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">14</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">15</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">16</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">17</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">18</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">19</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">20</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">21</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">22</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">23</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">24</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">25</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">26</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">27</div></div>
+                            <div class="calendar-day"><div class="calendar-day-number">28</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #A6E3B7 0%, #7AA88C 100%); border-radius: 10px; color: white;">
+                    <h3 style="margin-bottom: 15px;">🎯 주요 날짜 요약</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div><strong>11.01 (금):</strong> 개발 시작</div>
+                        <div><strong>11.14 (목):</strong> Flutter 학습 완료</div>
+                        <div><strong>12.12 (목):</strong> 1사이클 완주</div>
+                        <div><strong>12.26 (목):</strong> MVP 개발 완료</div>
+                        <div><strong>01.09 (목):</strong> 스토어 제출</div>
+                        <div><strong>01.23 (목):</strong> 소프트 런칭 (50명)</div>
+                        <div><strong>01.30 (목):</strong> 공식 런칭 (200 DL)</div>
+                        <div><strong>02.06 (금):</strong> Phase 2 판단</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 체크리스트 뷰 -->
+            <div id="checklist" class="view">
+                <h2 style="margin-bottom: 30px;">✅ 런칭 체크리스트</h2>
+
+                <div class="checklist">
+                    <div class="checklist-section">
+                        <div class="checklist-title">🛠️ 개발 완료 (Week 1-8)</div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>타이머 25분/5분 정상 작동</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>목표 설정 UI 완성 (15/30/60일, 1-4개)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>성장 로직 구현 (Lv1-4)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>졸업 시스템 완성</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>도감 UI 구현</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>AI 아트 6장 생성 & 통합</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>친구 3명 베타 테스트 완료</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>푸시 알림 구현 (APNs + FCM)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>계정 삭제 기능 (iOS 필수)</span>
+                        </div>
+                    </div>
+
+                    <div class="checklist-section">
+                        <div class="checklist-title">📱 스토어 제출 준비 (Week 9)</div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>앱 아이콘 1024x1024px 제작</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>스크린샷 5-8장 제작 (iPhone/Android)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>앱 설명 작성 (한글/영문)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>키워드 최적화 (ASO)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>개인정보 처리방침 웹페이지 (GitHub Pages)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>이용약관 작성 & 호스팅</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>지원 이메일 설정 (Gmail)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>앱 미리보기 영상 30초 (선택)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>Apple Developer 계정 ($99)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>Google Play Developer 계정 ($25)</span>
+                        </div>
+                    </div>
+
+                    <div class="checklist-section">
+                        <div class="checklist-title">🚀 런칭 (Week 10-12)</div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>iOS App Store 제출</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>Google Play Store 제출</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>심사 승인 확인</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>심사 승인 대기 (거절 시 재제출)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>지인 20-30명 소프트 런칭</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>초기 50명 확보</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>Product Hunt 등록</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>커뮤니티 홍보 (앱테크, 생산성)</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>Firebase Analytics 세팅</span>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('checked')">
+                            <span>D1/D7 리텐션 모니터링</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 마케팅 뷰 -->
+            <div id="marketing" class="view">
+                <h2 style="margin-bottom: 30px;">📣 MVP 마케팅 전략</h2>
+
+                <div class="marketing-grid">
+                    <div class="marketing-card">
+                        <h3>🎯 소프트 런칭 (Week 11)</h3>
+                        <p style="color: #666; margin-bottom: 15px;">작은 규모로 시작, 피드백 수집</p>
+                        <ul>
+                            <li>지인/친구 20-30명</li>
+                            <li>작은 온라인 커뮤니티</li>
+                            <li>대학교 에브리타임</li>
+                            <li>회사 사내 게시판</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">목표: 50명 확보</p>
+                    </div>
+
+                    <div class="marketing-card">
+                        <h3>🌐 무료 채널 (Week 12)</h3>
+                        <p style="color: #666; margin-bottom: 15px;">비용 없이 시작 가능</p>
+                        <ul>
+                            <li>Product Hunt 등록</li>
+                            <li>앱테크 커뮤니티 (뽐뿌, 클리앙)</li>
+                            <li>생산성 앱 디스코드/슬랙</li>
+                            <li>네이버 카페 (자기계발)</li>
+                            <li>인스타그램 #뽀모도로</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">목표: 첫 주 100-200 DL</p>
+                    </div>
+
+                    <div class="marketing-card">
+                        <h3>📝 ASO (앱 스토어 최적화)</h3>
+                        <p style="color: #666; margin-bottom: 15px;">검색 노출 최적화</p>
+                        <ul>
+                            <li>키워드: 뽀모도로, 타이머, 집중</li>
+                            <li>부제: "요정과 함께하는 집중 타이머"</li>
+                            <li>스크린샷 5장 (주요 기능)</li>
+                            <li>짧은 설명 (160자)</li>
+                            <li>긴 설명 (4000자)</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">목표: 자연 유입 확보</p>
+                    </div>
+
+                    <div class="marketing-card">
+                        <h3>👥 리뷰어 컨택</h3>
+                        <p style="color: #666; margin-bottom: 15px;">생산성 앱 리뷰어 대상</p>
+                        <ul>
+                            <li>유튜브 생산성 채널 (5-10개)</li>
+                            <li>앱 리뷰 블로거</li>
+                            <li>틱톡 크리에이터</li>
+                            <li>무료 프로모션 코드 제공</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">목표: 2-3개 리뷰 확보</p>
+                    </div>
+
+                    <div class="marketing-card">
+                        <h3>📊 데이터 추적</h3>
+                        <p style="color: #666; margin-bottom: 15px;">중요한 지표 모니터링</p>
+                        <ul>
+                            <li>D1 Retention (35% 목표)</li>
+                            <li>D7 Retention (20% 목표)</li>
+                            <li>평균 세션/일 (2-3개)</li>
+                            <li>졸업 완료율</li>
+                            <li>광고 제거 구매율</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">Firebase Analytics 필수</p>
+                    </div>
+
+                    <div class="marketing-card">
+                        <h3>💰 초기 수익화</h3>
+                        <p style="color: #666; margin-bottom: 15px;">MVP 단계 수익 모델</p>
+                        <ul>
+                            <li>광고 제거 IAP ($2.99)</li>
+                            <li>첫 달 목표: $20-50</li>
+                            <li>Phase 2 이후 확장</li>
+                            <li>성장 아이템 IAP 추가</li>
+                        </ul>
+                        <p style="margin-top: 15px; font-weight: 600;">수익보다 PMF 우선</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding: 25px; background: linear-gradient(135deg, #A6E3B7 0%, #7AA88C 100%); border-radius: 10px; color: white;">
+                    <h3 style="margin-bottom: 15px;">💡 MVP 마케팅 핵심 원칙</h3>
+                    <ul style="line-height: 2; list-style: none; padding: 0;">
+                        <li>✓ 작게 시작, 피드백 우선</li>
+                        <li>✓ 무료 채널 먼저, 유료는 검증 후</li>
+                        <li>✓ 리텐션 35% 달성 시 Phase 2 고려</li>
+                        <li>✓ 30% 미만이면 컨셉 재검토</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오버레이 & 툴팁 -->
+    <div class="overlay" id="overlay" onclick="closeTooltip()"></div>
+    <div class="tooltip" id="tooltip">
+        <span class="tooltip-close" onclick="closeTooltip()">×</span>
+        <div class="tooltip-header" id="tooltip-header"></div>
+        <div class="tooltip-content" id="tooltip-content"></div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentCalendarDay = null;
+
+        // 뷰 전환 함수
+        function showView(viewName) {
+            // 모든 뷰 숨기기
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 선택된 뷰 표시
+            document.getElementById(viewName).classList.add('active');
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+        }
+
+        // 툴팁 표시
+        function showTooltip(title, content) {
+            const tooltip = document.getElementById('tooltip');
+            const overlay = document.getElementById('overlay');
+            const header = document.getElementById('tooltip-header');
+            const contentDiv = document.getElementById('tooltip-content');
+            
+            header.textContent = title;
+            contentDiv.innerHTML = content;
+            
+            overlay.classList.add('show');
+            tooltip.classList.add('show');
+            
+            // 화면 중앙에 배치
+            tooltip.style.left = '50%';
+            tooltip.style.top = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+        }
+
+        // 툴팁 닫기
+        function closeTooltip() {
+            document.getElementById('tooltip').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        // 일정 추가 폼 표시
+        function showEventForm(dayElement, monthTitle) {
+            currentCalendarDay = dayElement;
+            const dayNum = dayElement.querySelector('.calendar-day-number');
+            if (!dayNum) return;
+            
+            const eventForm = document.getElementById('eventForm');
+            const overlay = document.getElementById('overlay');
+            const dateInput = document.getElementById('eventDate');
+            const titleInput = document.getElementById('eventTitle');
+            
+            // 날짜 설정
+            dateInput.value = monthTitle + ' ' + dayNum.textContent + '일';
+            titleInput.value = '';
+            
+            // 폼 표시
+            overlay.classList.add('show');
+            eventForm.classList.add('show');
+            eventForm.style.left = '50%';
+            eventForm.style.top = '50%';
+            eventForm.style.transform = 'translate(-50%, -50%)';
+            
+            // 입력창에 포커스
+            setTimeout(() => titleInput.focus(), 100);
+            
+            // 오버레이 클릭 시 닫기
+            overlay.onclick = closeEventForm;
+        }
+
+        // 일정 추가 폼 닫기
+        function closeEventForm() {
+            document.getElementById('eventForm').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('overlay').onclick = closeTooltip;
+        }
+
+        // 일정 추가
+        function addEvent() {
+            const titleInput = document.getElementById('eventTitle');
+            const eventTitle = titleInput.value.trim();
+            
+            if (!eventTitle) {
+                alert('일정 내용을 입력해주세요!');
+                return;
+            }
+            
+            if (!currentCalendarDay) return;
+            
+            // 기존 이벤트가 있으면 제거
+            const existingEvent = currentCalendarDay.querySelector('.calendar-event');
+            if (existingEvent) {
+                existingEvent.remove();
+            }
+            
+            // 새 이벤트 추가
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'calendar-event';
+            eventDiv.textContent = eventTitle;
+            currentCalendarDay.appendChild(eventDiv);
+            
+            // has-event 클래스 추가
+            currentCalendarDay.classList.add('has-event');
+            currentCalendarDay.classList.remove('empty');
+            
+            // 클릭 이벤트 추가
+            currentCalendarDay.onclick = function() {
+                const event = this.querySelector('.calendar-event');
+                const dayNum = this.querySelector('.calendar-day-number');
+                if (event && dayNum) {
+                    showTooltip(
+                        event.textContent,
+                        '<strong>📅 날짜:</strong> ' + dayNum.textContent + '일<br><br><small style="opacity: 0.7;">💡 다시 클릭하여 일정을 수정할 수 있습니다.</small>'
+                    );
+                }
+            };
+            
+            // 폼 닫기
+            closeEventForm();
+            
+            // 성공 메시지
+            showTooltip('✅ 일정이 추가되었습니다!', '<strong>' + eventTitle + '</strong><br>일정이 캘린더에 추가되었습니다.');
+            setTimeout(closeTooltip, 2000);
+        }
+
+        // DOM 로드 후 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM 로드 완료');
+            
+            // 캘린더 기존 일정 클릭 이벤트
+            const existingEvents = document.querySelectorAll('.calendar-day.has-event');
+            console.log('기존 일정:', existingEvents.length, '개');
+            
+            existingEvents.forEach(day => {
+                day.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const event = this.querySelector('.calendar-event');
+                    const dayNum = this.querySelector('.calendar-day-number');
+                    if (event && dayNum) {
+                        showTooltip(
+                            event.textContent,
+                            '<strong>📅 날짜:</strong> ' + dayNum.textContent + '일<br><br><small style="opacity: 0.7;">💡 다시 클릭하여 일정을 수정할 수 있습니다.</small>'
+                        );
+                    }
+                });
+            });
+
+            // 캘린더 빈 날짜 클릭 이벤트
+            const emptyDays = document.querySelectorAll('.calendar-day:not(.has-event)');
+            console.log('빈 날짜:', emptyDays.length, '개');
+            
+            emptyDays.forEach(day => {
+                const dayNum = day.querySelector('.calendar-day-number');
+                if (dayNum) {
+                    day.classList.add('empty');
+                    day.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        console.log('빈 날짜 클릭:', dayNum.textContent);
+                        const monthElement = this.closest('.calendar-month');
+                        if (monthElement) {
+                            const monthTitle = monthElement.querySelector('.calendar-month-title').textContent;
+                            console.log('월:', monthTitle);
+                            showEventForm(this, monthTitle);
+                        }
+                    });
+                }
+            });
+
+            // Enter 키로 일정 추가
+            const eventTitleInput = document.getElementById('eventTitle');
+            if (eventTitleInput) {
+                eventTitleInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addEvent();
+                    }
+                });
+            }
+
+            // ESC 키로 툴팁/폼 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeTooltip();
+                    closeEventForm();
+                }
+            });
+        });
+    </script>
+
+    <!-- 일정 추가 폼 -->
+    <div class="event-form" id="eventForm">
+        <div class="event-form-title">📅 일정 추가</div>
+        <div class="event-form-group">
+            <label class="event-form-label">날짜</label>
+            <input type="text" class="event-form-input" id="eventDate" readonly>
+        </div>
+        <div class="event-form-group">
+            <label class="event-form-label">일정 내용</label>
+            <input type="text" class="event-form-input" id="eventTitle" placeholder="일정을 입력하세요">
+        </div>
+        <div class="event-form-buttons">
+            <button class="event-form-button secondary" onclick="closeEventForm()">취소</button>
+            <button class="event-form-button primary" onclick="addEvent()">추가</button>
+        </div>
+    </div>
+
+</body>
+</html>
