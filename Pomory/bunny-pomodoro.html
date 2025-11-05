@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐰 토끼 포모도로</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 헤더 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .menu-icon {
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+        }
+
+        .menu-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .character-icon {
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ff9a9e;
+        }
+
+        .character-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 10px rgba(255, 154, 158, 0.4);
+        }
+
+        .point-badge {
+            background: #fff3cd;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #856404;
+            border: 2px solid #ffc107;
+        }
+
+        /* 화면 전환 */
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 메인 화면 - 캐릭터와 원형 타이머 */
+        .main-circle {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 40px auto;
+        }
+
+        /* SVG 원형 진행바 */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            stroke: #e0e0e0;
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .progress-ring-progress {
+            stroke: #ff9a9e;
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        /* 캐릭터 */
+        .character {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .character:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .character:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        /* 캐릭터 SVG */
+        .bunny-body {
+            fill: #fff;
+            stroke: #333;
+            stroke-width: 3;
+        }
+
+        .bunny-ear {
+            fill: #fff;
+            stroke: #333;
+            stroke-width: 3;
+        }
+
+        .bunny-face {
+            fill: none;
+            stroke: #333;
+            stroke-width: 2;
+        }
+
+        /* 태그 */
+        .tag-label {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #f8f9fa;
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 타이머 오브 (드래그 가능한 동그란 오브젝트) */
+        .timer-orb {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: grab;
+            transition: transform 0.1s;
+            z-index: 10;
+        }
+
+        .timer-orb:active {
+            cursor: grabbing;
+        }
+
+        .timer-orb.dragging {
+            transition: none;
+        }
+
+        .orb-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 50%;
+            border: 4px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .timer-orb:hover .orb-inner {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* 메인 타이머 디스플레이 */
+        .main-timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            display: none;
+        }
+
+        .main-timer-display.show {
+            display: block;
+        }
+
+        /* 메인 컨트롤 버튼 */
+        .main-controls {
+            display: none;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .main-controls.show {
+            display: flex;
+        }
+
+        /* 캐릭터 스테이터스 화면 */
+        .character-display-large {
+            width: 250px;
+            height: 250px;
+            margin: 20px auto 30px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ff9a9e;
+            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.3);
+        }
+
+        .level-info {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .level-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .level-label {
+            font-size: 1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .level-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .exp-bar-container {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        .exp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9a9e 0%, #fad0c4 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .exp-text {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .basic-stats {
+            margin: 30px 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .stat-row:hover {
+            background: #fff;
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-name {
+            font-size: 1em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        /* RPG 스타일 스탯 */
+        .rpg-stats {
+            margin: 30px 0;
+        }
+
+        .rpg-stat-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin: 12px 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .rpg-stat-row:hover {
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            font-size: 2em;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #333;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-name {
+            font-size: 0.95em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .stat-bar-container {
+            width: 100%;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+
+        .stat-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 6px;
+        }
+
+        .stat-bar.intelligence {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-bar.health {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-bar.beauty {
+            background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        .stat-bar.social {
+            background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        /* 총합 스탯 카드 */
+        .total-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .total-stat-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #333;
+            text-align: center;
+        }
+
+        .total-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .total-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .character-mood {
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            border-radius: 15px;
+            border: 2px solid #ff9a9e;
+            text-align: center;
+        }
+
+        .mood-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .mood-text {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .status-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            border: 3px solid #333;
+            border-radius: 25px;
+            background: white;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* History 화면 스타일 */
+        .today-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .recent-activities {
+            margin: 30px 0;
+        }
+
+        .activity-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+        }
+
+        .activity-icon {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            border: 2px solid #ff9a9e;
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-time {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .activity-points {
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 1.1em;
+        }
+
+        .achievements {
+            margin: 30px 0;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .achievement-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #333;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        }
+
+        .achievement-card.locked {
+            background: #f8f9fa;
+            opacity: 0.6;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .achievement-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .achievement-name {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* 네비게이션 */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #f8f9fa;
+            transform: scale(1.1);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+
+        /* 설정 화면 */
+        .settings-screen {
+            padding: 20px 0;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .setting-input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* 통계 차트 */
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 150px;
+            margin-top: 20px;
+        }
+
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(to top, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        /* 알림 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 3px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: slideDown 0.3s;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { transform: translate(-50%, -100px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #f8f9fa;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div id="notificationText">알림 메시지</div>
+    </div>
+
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="menu-icon" onclick="showScreen('settings')">☰</div>
+            <div class="title-group">
+                <div class="title">감양</div>
+                <div class="character-icon" onclick="showScreen('character')">🐰</div>
+            </div>
+            <div class="point-badge" id="pointBadge">Point: 0</div>
+        </div>
+
+        <!-- 메인 화면 -->
+        <div class="screen active" id="mainScreen">
+            <div class="main-circle">
+                <!-- SVG 원형 진행바 -->
+                <svg width="280" height="280" class="progress-ring">
+                    <circle class="progress-ring-circle" cx="140" cy="140" r="130"/>
+                    <circle class="progress-ring-progress" id="progressCircle" cx="140" cy="140" r="130"
+                            stroke-dasharray="817" stroke-dashoffset="817"/>
+                </svg>
+
+                <!-- 캐릭터 -->
+                <div class="character" onclick="showScreen('character')">
+                    <svg viewBox="0 0 150 150">
+                        <!-- 귀 -->
+                        <ellipse class="bunny-ear" cx="55" cy="30" rx="15" ry="35" transform="rotate(-20 55 30)"/>
+                        <ellipse class="bunny-ear" cx="95" cy="30" rx="15" ry="35" transform="rotate(20 95 30)"/>
+                        <!-- 몸통 -->
+                        <circle class="bunny-body" cx="75" cy="85" r="45"/>
+                        <!-- 얼굴 -->
+                        <circle cx="60" cy="75" r="3" fill="#333"/>
+                        <circle cx="90" cy="75" r="3" fill="#333"/>
+                        <path class="bunny-face" d="M 75 85 Q 75 90 75 90"/>
+                        <path class="bunny-face" d="M 65 90 Q 75 95 85 90"/>
+                        <!-- 손 -->
+                        <circle cx="35" cy="95" r="12" fill="#fff" stroke="#333" stroke-width="3"/>
+                        <circle cx="115" cy="95" r="12" fill="#fff" stroke="#333" stroke-width="3"/>
+                    </svg>
+                </div>
+
+                <!-- 드래그 가능한 타이머 오브 -->
+                <div class="timer-orb" id="timerOrb">
+                    <div class="orb-inner">
+                        <span id="orbTime">25</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 태그와 타이머 표시 -->
+            <div class="tag-label">
+                <div class="tag" id="currentTag">드래그해서 시간 설정</div>
+            </div>
+
+            <!-- 타이머 디스플레이 (타이머 작동 중에만 표시) -->
+            <div class="main-timer-display" id="mainTimerDisplay">25:00</div>
+
+            <!-- 컨트롤 버튼 (타이머 작동 중에만 표시) -->
+            <div class="main-controls" id="mainControls">
+                <button class="control-btn" onclick="pauseTimer()">⏸</button>
+                <button class="control-btn" onclick="resetTimer()">⏹</button>
+            </div>
+        </div>
+
+        <!-- 캐릭터 스테이터스 화면 -->
+        <div class="screen" id="characterScreen">
+            <div class="back-btn" onclick="showScreen('main')">←</div>
+            
+            <div class="status-title">🐰 감양</div>
+
+            <!-- 캐릭터 디스플레이 - 크게 -->
+            <div class="character-display-large">
+                <svg viewBox="0 0 150 150">
+                    <ellipse class="bunny-ear" cx="55" cy="30" rx="15" ry="35" transform="rotate(-20 55 30)"/>
+                    <ellipse class="bunny-ear" cx="95" cy="30" rx="15" ry="35" transform="rotate(20 95 30)"/>
+                    <circle class="bunny-body" cx="75" cy="85" r="45"/>
+                    <circle cx="60" cy="75" r="3" fill="#333"/>
+                    <circle cx="90" cy="75" r="3" fill="#333"/>
+                    <path class="bunny-face" d="M 75 85 Q 75 90 75 90"/>
+                    <path class="bunny-face" d="M 65 90 Q 75 95 85 90"/>
+                    <circle cx="35" cy="95" r="12" fill="#fff" stroke="#333" stroke-width="3"/>
+                    <circle cx="115" cy="95" r="12" fill="#fff" stroke="#333" stroke-width="3"/>
+                </svg>
+            </div>
+
+            <!-- 레벨과 경험치 바 -->
+            <div class="level-info">
+                <div class="level-display">
+                    <span class="level-label">Level</span>
+                    <span class="level-number" id="characterLevel">1</span>
+                </div>
+                <div class="exp-bar-container">
+                    <div class="exp-bar" id="expBar"></div>
+                </div>
+                <div class="exp-text" id="expText">0 / 500 XP</div>
+            </div>
+
+            <!-- RPG 스타일 스테이터스 -->
+            <div class="rpg-stats">
+                <!-- 지능 -->
+                <div class="rpg-stat-row">
+                    <div class="stat-icon">🧠</div>
+                    <div class="stat-info">
+                        <div class="stat-header">
+                            <span class="stat-name">지능 (Intelligence)</span>
+                            <span class="stat-number" id="statIntelligence">0</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar intelligence" id="barIntelligence"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 체력 -->
+                <div class="rpg-stat-row">
+                    <div class="stat-icon">💪</div>
+                    <div class="stat-info">
+                        <div class="stat-header">
+                            <span class="stat-name">체력 (Health)</span>
+                            <span class="stat-number" id="statHealth">0</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar health" id="barHealth"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 매력 -->
+                <div class="rpg-stat-row">
+                    <div class="stat-icon">✨</div>
+                    <div class="stat-info">
+                        <div class="stat-header">
+                            <span class="stat-name">매력 (Beauty)</span>
+                            <span class="stat-number" id="statBeauty">0</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar beauty" id="barBeauty"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 사회성 -->
+                <div class="rpg-stat-row">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-header">
+                            <span class="stat-name">사회성 (Social)</span>
+                            <span class="stat-number" id="statSocial">0</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar social" id="barSocial"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 총합 스탯 -->
+            <div class="total-stats">
+                <div class="total-stat-card">
+                    <div class="total-label">총 스탯 포인트</div>
+                    <div class="total-value" id="totalStatPoints">0</div>
+                </div>
+                <div class="total-stat-card">
+                    <div class="total-label">완료한 포모도로</div>
+                    <div class="total-value" id="totalPomodoros">0</div>
+                </div>
+            </div>
+
+            <!-- 상태 메시지 -->
+            <div class="character-mood" id="characterMood">
+                <div class="mood-icon">😊</div>
+                <div class="mood-text">열심히 성장하고 있어요!</div>
+            </div>
+        </div>
+
+        <!-- History 화면 (기존 캐릭터 화면 내용) -->
+        <div class="screen" id="historyScreen">
+            <div class="back-btn" onclick="showScreen('main')">←</div>
+            
+            <div class="status-title">📊 History</div>
+
+            <!-- 오늘의 요약 -->
+            <div class="today-summary">
+                <div class="summary-card">
+                    <div class="summary-label">오늘</div>
+                    <div class="summary-value" id="todaySessions">0회</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">이번 주</div>
+                    <div class="summary-value" id="weekSessions">0회</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">총 누적</div>
+                    <div class="summary-value" id="totalSessions">0회</div>
+                </div>
+            </div>
+
+            <!-- 주간 통계 차트 -->
+            <div class="chart-container">
+                <div style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em;">📈 주간 활동</div>
+                <div class="chart-bars" id="weeklyChart">
+                    <!-- 차트 바들 -->
+                </div>
+            </div>
+
+            <!-- 최근 활동 -->
+            <div class="recent-activities">
+                <div style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em;">🕐 최근 활동</div>
+                <div class="activity-list" id="activityList">
+                    <div class="activity-item">
+                        <div class="activity-icon">🍅</div>
+                        <div class="activity-info">
+                            <div class="activity-title">포모도로 완료</div>
+                            <div class="activity-time">방금 전</div>
+                        </div>
+                        <div class="activity-points">+100</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 업적 -->
+            <div class="achievements">
+                <div style="font-weight: bold; margin-bottom: 15px; font-size: 1.1em;">🏆 업적</div>
+                <div class="achievement-grid">
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">🎯</div>
+                        <div class="achievement-name">첫 포모도로</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">🔒</div>
+                        <div class="achievement-name">10회 달성</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">🔒</div>
+                        <div class="achievement-name">연속 7일</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">🔒</div>
+                        <div class="achievement-name">레벨 10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설정 화면 -->
+        <div class="screen" id="settingsScreen">
+            <div class="back-btn" onclick="showScreen('main')">←</div>
+            
+            <div class="status-title">⚙️ 설정</div>
+
+            <div class="settings-screen">
+                <div class="setting-item">
+                    <span class="setting-label">포모도로 시간</span>
+                    <input type="number" class="setting-input" id="pomodoroInput" value="25" min="1" max="60">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">짧은 휴식</span>
+                    <input type="number" class="setting-input" id="shortBreakInput" value="5" min="1" max="30">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">긴 휴식</span>
+                    <input type="number" class="setting-input" id="longBreakInput" value="15" min="1" max="60">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">사운드</span>
+                    <input type="checkbox" id="soundToggle" checked style="width: 30px; height: 30px; cursor: pointer;">
+                </div>
+            </div>
+
+            <!-- 리셋 버튼 -->
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="control-btn" onclick="resetAllData()">🔄 모든 데이터 초기화</button>
+            </div>
+        </div>
+
+        <!-- 네비게이션 -->
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showScreen('main')">🏠</button>
+            <button class="nav-btn" onclick="showScreen('history')">📊</button>
+            <button class="nav-btn" onclick="showScreen('settings')">⚙️</button>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let timerInterval = null;
+        let timeLeft = 25 * 60;
+        let isRunning = false;
+        let totalSeconds = 25 * 60;
+        let completedPomodoros = 0;
+        let streak = 0;
+        let totalMinutes = 0;
+        let points = 0;
+        let level = 1;
+        let currentMode = 'idle';
+        let totalPomodoros = 0;
+
+        // RPG 스탯
+        let stats = {
+            intelligence: 0,
+            health: 0,
+            beauty: 0,
+            social: 0
+        };
+
+        // 드래그 관련 변수
+        let isDragging = false;
+        let circleCenter = { x: 0, y: 0 };
+        let circleRadius = 130;
+        let currentAngle = 0;
+
+        // 설정
+        let settings = {
+            pomodoro: 25,
+            shortBreak: 5,
+            longBreak: 15,
+            sound: true
+        };
+
+        // 초기화
+        function init() {
+            loadData();
+            updateDisplay();
+            updateStats();
+            createWeeklyChart();
+            setupDragOrb();
+        }
+
+        // 드래그 오브 설정
+        function setupDragOrb() {
+            const orb = document.getElementById('timerOrb');
+            const mainCircle = document.querySelector('.main-circle');
+            
+            // 원의 중심점 계산
+            const rect = mainCircle.getBoundingClientRect();
+            circleCenter = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+
+            // 터치 이벤트
+            orb.addEventListener('touchstart', startDrag);
+            orb.addEventListener('mousedown', startDrag);
+            
+            document.addEventListener('touchmove', drag);
+            document.addEventListener('mousemove', drag);
+            
+            document.addEventListener('touchend', endDrag);
+            document.addEventListener('mouseup', endDrag);
+
+            // 초기 위치 설정 (12시 방향)
+            updateOrbPosition(currentAngle);
+        }
+
+        function startDrag(e) {
+            if (isRunning) return; // 타이머 작동 중에는 드래그 불가
+            
+            isDragging = true;
+            document.getElementById('timerOrb').classList.add('dragging');
+            e.preventDefault();
+        }
+
+        function drag(e) {
+            if (!isDragging || isRunning) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            const mainCircle = document.querySelector('.main-circle');
+            const rect = mainCircle.getBoundingClientRect();
+            
+            // 마우스/터치 위치
+            const mouseX = touch.clientX;
+            const mouseY = touch.clientY;
+            
+            // 원의 중심점
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // 각도 계산 (라디안)
+            let angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+            
+            // 12시 방향을 0도로 만들기 위해 조정 (Math.atan2는 3시 방향이 0)
+            angle = angle + Math.PI / 2;
+            
+            // 음수 각도를 양수로 변환
+            if (angle < 0) {
+                angle += 2 * Math.PI;
+            }
+            
+            currentAngle = angle;
+            
+            // 오브 위치 업데이트
+            updateOrbPosition(angle);
+            
+            // 시간 계산 (1~120분, 원을 한 바퀴 돌면 120분)
+            const minutes = Math.max(1, Math.round((angle / (2 * Math.PI)) * 120));
+            document.getElementById('orbTime').textContent = minutes;
+            
+            // 설정된 시간 업데이트
+            settings.pomodoro = minutes;
+            timeLeft = minutes * 60;
+            totalSeconds = timeLeft;
+            updateDisplay();
+        }
+
+        function endDrag() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            document.getElementById('timerOrb').classList.remove('dragging');
+            
+            // 오브를 클릭한 경우 (드래그 안함) - 타이머 시작
+            if (!isRunning) {
+                startTimer();
+            }
+        }
+
+        function updateOrbPosition(angle) {
+            const orb = document.getElementById('timerOrb');
+            const mainCircle = document.querySelector('.main-circle');
+            
+            // 원의 중심에서의 상대 위치 계산
+            const x = Math.cos(angle - Math.PI / 2) * circleRadius;
+            const y = Math.sin(angle - Math.PI / 2) * circleRadius;
+            
+            // 오브 위치 설정 (main-circle 내부 기준)
+            orb.style.left = `calc(50% + ${x}px)`;
+            orb.style.top = `calc(50% + ${y}px)`;
+        }
+
+        // 타이머 시작
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            currentMode = 'focus';
+            updateTag();
+            
+            // 오브 숨기기
+            document.getElementById('timerOrb').style.display = 'none';
+            
+            // 타이머 디스플레이와 컨트롤 표시
+            document.getElementById('mainTimerDisplay').classList.add('show');
+            document.getElementById('mainControls').classList.add('show');
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                updateProgress();
+
+                if (timeLeft <= 0) {
+                    completePomodoro();
+                }
+            }, 1000);
+        }
+
+        // 타이머 일시정지
+        function pauseTimer() {
+            isRunning = false;
+            currentMode = 'idle';
+            updateTag();
+            clearInterval(timerInterval);
+            
+            // 오브 다시 표시
+            document.getElementById('timerOrb').style.display = 'block';
+            
+            // 타이머 디스플레이와 컨트롤 숨기기
+            document.getElementById('mainTimerDisplay').classList.remove('show');
+            document.getElementById('mainControls').classList.remove('show');
+            
+            // 오브 위치 초기화
+            currentAngle = 0;
+            updateOrbPosition(currentAngle);
+            document.getElementById('orbTime').textContent = settings.pomodoro;
+        }
+
+        // 타이머 리셋
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = settings.pomodoro * 60;
+            totalSeconds = timeLeft;
+            updateDisplay();
+            updateProgress();
+        }
+
+        // 포모도로 완료
+        function completePomodoro() {
+            pauseTimer();
+            completedPomodoros++;
+            totalPomodoros++;
+            totalMinutes += settings.pomodoro;
+            streak++;
+            points += 100;
+            
+            // 랜덤 스탯 증가!
+            increaseRandomStat();
+            
+            // 레벨업 체크 (500점마다)
+            if (points >= level * 500) {
+                level++;
+                showNotification('🎉 레벨 업! Level ' + level);
+            }
+
+            currentMode = 'complete';
+            updateTag();
+            updateStats();
+            saveData();
+            
+            showNotification('🎉 포모도로 완료! +100 포인트');
+            playSound();
+
+            // 완료 후 초기화
+            setTimeout(() => {
+                timeLeft = settings.pomodoro * 60;
+                totalSeconds = timeLeft;
+                currentMode = 'idle';
+                updateTag();
+                updateDisplay();
+                updateProgress();
+            }, 3000);
+        }
+
+        // 디스플레이 업데이트
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('mainTimerDisplay').textContent = display;
+        }
+
+        // 원형 진행바 업데이트
+        function updateProgress() {
+            const circle = document.getElementById('progressCircle');
+            const circumference = 2 * Math.PI * 130;
+            const progress = (totalSeconds - timeLeft) / totalSeconds;
+            const offset = circumference - (progress * circumference);
+            circle.style.strokeDashoffset = offset;
+        }
+
+        // 태그 업데이트
+        function updateTag() {
+            const tags = {
+                'idle': '드래그해서 시간 설정',
+                'focus': '집중 중...',
+                'rest': '휴식 중...',
+                'complete': '완료!'
+            };
+            document.getElementById('currentTag').textContent = tags[currentMode];
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            document.getElementById('pointBadge').textContent = 'Point: ' + points;
+            document.getElementById('completedSessions').textContent = completedPomodoros;
+            document.getElementById('streakCount').textContent = streak;
+            document.getElementById('totalTime').textContent = Math.floor(totalMinutes / 60) + 'h';
+            document.getElementById('levelDisplay').textContent = level;
+        }
+
+        // 화면 전환
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const screens = {
+                'main': ['mainScreen', 0],
+                'character': ['characterScreen', null],
+                'history': ['historyScreen', 1],
+                'settings': ['settingsScreen', 2]
+            };
+
+            const [screenId, navIndex] = screens[screenName];
+            document.getElementById(screenId).classList.add('active');
+            
+            if (navIndex !== null) {
+                document.querySelectorAll('.nav-btn')[navIndex].classList.add('active');
+            }
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            // 헤더 포인트
+            document.getElementById('pointBadge').textContent = 'Point: ' + points;
+            
+            // 캐릭터 화면 - 레벨 & 경험치
+            document.getElementById('characterLevel').textContent = level;
+            const expProgress = (points % 500) / 500 * 100;
+            document.getElementById('expBar').style.width = expProgress + '%';
+            document.getElementById('expText').textContent = (points % 500) + ' / 500 XP';
+            
+            // RPG 스탯 업데이트
+            document.getElementById('statIntelligence').textContent = stats.intelligence;
+            document.getElementById('statHealth').textContent = stats.health;
+            document.getElementById('statBeauty').textContent = stats.beauty;
+            document.getElementById('statSocial').textContent = stats.social;
+            
+            // 스탯 바 (최대 100)
+            document.getElementById('barIntelligence').style.width = Math.min(stats.intelligence, 100) + '%';
+            document.getElementById('barHealth').style.width = Math.min(stats.health, 100) + '%';
+            document.getElementById('barBeauty').style.width = Math.min(stats.beauty, 100) + '%';
+            document.getElementById('barSocial').style.width = Math.min(stats.social, 100) + '%';
+            
+            // 총합
+            const totalStats = stats.intelligence + stats.health + stats.beauty + stats.social;
+            document.getElementById('totalStatPoints').textContent = totalStats;
+            document.getElementById('totalPomodoros').textContent = completedPomodoros;
+            
+            // History 화면
+            document.getElementById('todaySessions').textContent = completedPomodoros + '회';
+            document.getElementById('weekSessions').textContent = completedPomodoros + '회';
+            document.getElementById('totalSessions').textContent = totalPomodoros + '회';
+            
+            // 캐릭터 상태 메시지 업데이트
+            updateCharacterMood();
+        }
+
+        // 랜덤 스탯 증가 (포모도로 완료 시)
+        function increaseRandomStat() {
+            const statNames = ['intelligence', 'health', 'beauty', 'social'];
+            const randomStat = statNames[Math.floor(Math.random() * statNames.length)];
+            const increase = Math.floor(Math.random() * 3) + 2; // 2~4 증가
+            
+            stats[randomStat] += increase;
+            
+            const statKorean = {
+                'intelligence': '지능',
+                'health': '체력',
+                'beauty': '매력',
+                'social': '사회성'
+            };
+            
+            showNotification(`✨ ${statKorean[randomStat]} +${increase}!`);
+        }
+
+        // 캐릭터 상태 메시지
+        function updateCharacterMood() {
+            const totalStats = stats.intelligence + stats.health + stats.beauty + stats.social;
+            
+            const moods = [
+                { icon: '😊', text: '열심히 성장하고 있어요!', min: 0 },
+                { icon: '😄', text: '좋아요! 스탯이 올라가고 있어요!', min: 20 },
+                { icon: '🤗', text: '훌륭해요! 많이 성장했어요!', min: 50 },
+                { icon: '💪', text: '대단해요! 강력한 캐릭터가 되고 있어요!', min: 100 },
+                { icon: '🌟', text: '완벽해요! 최강 캐릭터예요!', min: 150 },
+                { icon: '👑', text: '전설이에요! 경이로워요!', min: 200 }
+            ];
+            
+            const currentMood = moods.reverse().find(mood => totalStats >= mood.min) || moods[moods.length - 1];
+            document.getElementById('characterMood').innerHTML = `
+                <div class="mood-icon">${currentMood.icon}</div>
+                <div class="mood-text">${currentMood.text}</div>
+            `;
+        }
+
+        // 주간 차트 생성
+        function createWeeklyChart() {
+            const days = ['월', '화', '수', '목', '금', '토', '일'];
+            const chartContainer = document.getElementById('weeklyChart');
+            chartContainer.innerHTML = '';
+
+            const data = [3, 5, 2, 7, 4, 6, 1];
+
+            data.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = (value * 20) + 'px';
+                
+                const label = document.createElement('div');
+                label.className = 'chart-label';
+                label.textContent = days[index];
+                bar.appendChild(label);
+                
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        // 알림 표시
+        function showNotification(text) {
+            const notification = document.getElementById('notification');
+            document.getElementById('notificationText').textContent = text;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 사운드 재생
+        function playSound() {
+            if (!settings.sound) return;
+            
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // 데이터 저장
+        function saveData() {
+            const data = {
+                completedPomodoros,
+                totalPomodoros,
+                streak,
+                totalMinutes,
+                points,
+                level,
+                stats,
+                date: new Date().toDateString()
+            };
+            localStorage.setItem('pomodoroData', JSON.stringify(data));
+        }
+
+        // 데이터 로드
+        function loadData() {
+            const saved = localStorage.getItem('pomodoroData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                
+                if (data.date === new Date().toDateString()) {
+                    completedPomodoros = data.completedPomodoros || 0;
+                    totalPomodoros = data.totalPomodoros || 0;
+                    streak = data.streak || 0;
+                    totalMinutes = data.totalMinutes || 0;
+                    points = data.points || 0;
+                    level = data.level || 1;
+                    
+                    // 스탯 로드
+                    if (data.stats) {
+                        stats = data.stats;
+                    }
+                } else {
+                    // 다른 날이면 일일 데이터만 초기화
+                    completedPomodoros = 0;
+                    // 스탯과 레벨은 유지
+                    if (data.stats) stats = data.stats;
+                    if (data.level) level = data.level;
+                    if (data.points) points = data.points;
+                    if (data.totalPomodoros) totalPomodoros = data.totalPomodoros;
+                }
+            }
+
+            const savedSettings = localStorage.getItem('pomodoroSettings');
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+                document.getElementById('pomodoroInput').value = settings.pomodoro;
+                document.getElementById('shortBreakInput').value = settings.shortBreak;
+                document.getElementById('longBreakInput').value = settings.longBreak;
+                document.getElementById('soundToggle').checked = settings.sound;
+            }
+
+            timeLeft = settings.pomodoro * 60;
+            totalSeconds = timeLeft;
+            document.getElementById('orbTime').textContent = settings.pomodoro;
+        }
+
+        // 설정 변경 이벤트
+        document.getElementById('pomodoroInput').addEventListener('change', function() {
+            settings.pomodoro = parseInt(this.value);
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+            if (!isRunning) {
+                timeLeft = settings.pomodoro * 60;
+                totalSeconds = timeLeft;
+                updateDisplay();
+                updateProgress();
+                document.getElementById('orbTime').textContent = settings.pomodoro;
+            }
+        });
+
+        document.getElementById('shortBreakInput').addEventListener('change', function() {
+            settings.shortBreak = parseInt(this.value);
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+        });
+
+        document.getElementById('longBreakInput').addEventListener('change', function() {
+            settings.longBreak = parseInt(this.value);
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+        });
+
+        document.getElementById('soundToggle').addEventListener('change', function() {
+            settings.sound = this.checked;
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+        });
+
+        // 모든 데이터 초기화
+        function resetAllData() {
+            if (confirm('정말로 모든 데이터를 초기화하시겠습니까?')) {
+                localStorage.clear();
+                completedPomodoros = 0;
+                totalPomodoros = 0;
+                streak = 0;
+                totalMinutes = 0;
+                points = 0;
+                level = 1;
+                stats = {
+                    intelligence: 0,
+                    health: 0,
+                    beauty: 0,
+                    social: 0
+                };
+                updateStats();
+                showNotification('✨ 데이터가 초기화되었습니다');
+            }
+        }
+
+        // 초기화 실행
+        init();
+    </script>
+</body>
+</html>
