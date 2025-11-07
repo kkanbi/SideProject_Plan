@@ -54,10 +54,10 @@
   <!-- 시장지표 -->
   <div class="card center" style="margin-top:20px">
     <p>📅 <span id="date">로딩중...</span></p>
-    <p>VIX: <b id="vix"></b> ｜ S&P fwd P/E: <b id="pe"></b> ｜ Nasdaq P/E: <b id="ndxpe"></b></p>
+    <p>VIX: <b id="vix"></b> ｜ S&P fwd P/E: <b id="pe"></b> ｜ Nasdaq P/E: <b id="ndxpe"></b></p>
   </div>
 
-  <div class="footer">signals.json 파일이 같은 폴더에 있으면 자동으로 전략, SGOV 상태, 시그널이 표시됩니다.</div>
+  <div class="footer">📁 signals.json 파일이 같은 폴더에 있으면 자동으로 전략, SGOV 상태, 시그널이 표시됩니다.</div>
 </div>
 
 <script>
@@ -94,18 +94,22 @@ function renderSignals(data){
  });
 }
 
-fetch('signals.json')
+// ✅ GitHub Pages 절대경로 + 캐시무효화
+const jsonPath = 'https://kkanbi.github.io/SideProject_Plan/Investing/signals.json?nocache=' + Date.now();
+
+fetch(jsonPath)
  .then(r=>r.json())
  .then(data=>{
    // 전략 개요 표시
    if(data.strategy_overview){
      const so=data.strategy_overview;
-     document.getElementById('strategy').innerHTML=
-       `<h2>🎯 ${so.goal}</h2>
-        <p><b>구조:</b> ${so.core_structure}</p>
-        <p><b>목표 수익:</b> ${so.income_target}</p>
-        <p><b>리밸런싱 기준:</b> ${so.rebalance_rule}</p>
-        <p><b>철학:</b> ${so.philosophy}</p>`;
+     document.getElementById('strategy').innerHTML=`
+       <h2>🎯 ${so.goal}</h2>
+       <p><b>구조:</b> ${so.core_structure}</p>
+       <p><b>목표 수익:</b> ${so.income_target}</p>
+       <p><b>리밸런싱 기준:</b> ${so.rebalance_rule}</p>
+       <p><b>철학:</b> ${so.philosophy}</p>
+     `;
    }
    // SGOV 체크리스트 표시
    if(data.sgov_checklist){
@@ -124,7 +128,7 @@ fetch('signals.json')
    renderGauges();renderSignals(data);
  })
  .catch(e=>{
-   document.getElementById('strategy').textContent='⚠️ signals.json 파일을 불러오지 못했습니다.';
+   document.getElementById('strategy').textContent='⚠️ signals.json 파일을 불러오지 못했습니다. ('+jsonPath+')';
  });
 </script>
 </body>
