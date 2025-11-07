@@ -30,7 +30,14 @@
   .strategy{background:var(--card);border-radius:16px;padding:16px;margin-bottom:24px}
   .strategy h2{font-size:18px;margin:0 0 6px;color:#93c5fd}
   .strategy p{font-size:14px;color:#e2e8f0;margin:4px 0}
-  .sgov-box{background:var(--card);border-radius:16px;padding:14px;margin-top:20px;text-align:center}
+  .sgov-box{
+    background:var(--card);
+    border-radius:16px;
+    padding:14px;
+    margin-top:20px;
+    margin-bottom:24px; /* ✅ added spacing below */
+    text-align:center;
+  }
   .sgov-status{font-size:20px;font-weight:600}
   .sgov-summary{font-size:13px;color:#cbd5e1;margin-top:4px}
 </style>
@@ -54,7 +61,7 @@
   <!-- 시장지표 -->
   <div class="card center" style="margin-top:20px">
     <p>📅 <span id="date">로딩중...</span></p>
-    <p>VIX: <b id="vix"></b> ｜ S&P fwd P/E: <b id="pe"></b> ｜ Nasdaq P/E: <b id="ndxpe"></b></p>
+    <p>VIX: <b id="vix"></b> ｜ S&P fwd P/E: <b id="pe"></b> ｜ Nasdaq P/E: <b id="ndxpe"></b></p>
   </div>
 
   <div class="footer">📁 signals.json 파일이 같은 폴더에 있으면 자동으로 전략, SGOV 상태, 시그널이 표시됩니다.</div>
@@ -100,7 +107,6 @@ const jsonPath = 'https://kkanbi.github.io/SideProject_Plan/Investing/signals.js
 fetch(jsonPath)
  .then(r=>r.json())
  .then(data=>{
-   // 전략 개요 표시
    if(data.strategy_overview){
      const so=data.strategy_overview;
      document.getElementById('strategy').innerHTML=`
@@ -111,7 +117,6 @@ fetch(jsonPath)
        <p><b>철학:</b> ${so.philosophy}</p>
      `;
    }
-   // SGOV 체크리스트 표시
    if(data.sgov_checklist){
      const box=document.getElementById('sgovbox');
      const st=data.sgov_checklist.status;
