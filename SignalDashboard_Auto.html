@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>리밸런싱 & 매수 시그널 보드 (자동 연동 + 전략 + SGOV 상태)</title>
+<style>
+  :root {
+    --bg1:#0f172a; --bg2:#111827; --card:#1f2937; --text:#e5e7eb; --muted:#9ca3af;
+    --blue:#3b82f6; --green:#10b981; --amber:#f59e0b; --red:#ef4444; --gray:#6b7280;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text)}
+  .wrap{max-width:1100px;margin:40px auto;padding:0 16px}
+  h1{text-align:center;font-size:28px;margin:0 0 20px}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 10px 20px rgba(0,0,0,.2);padding:16px}
+  .center{text-align:center}
+  .label{color:var(--muted);font-size:13px;text-transform:uppercase}
+  .value{font-weight:700;font-size:22px;margin-top:6px}
+  .progress{width:100%;height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:10px 0}
+  .bar{height:100%;background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(255,255,255,.2));}
+  .signal{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:999px}
+  .name{font-weight:600}
+  .status{font-size:13px;color:var(--muted)}
+  .detail{font-size:12px;color:#cbd5e1;text-align:center}
+  .footer{margin:20px 0 0;color:var(--muted);font-size:12px;text-align:center}
+  .strategy{background:var(--card);border-radius:16px;padding:16px;margin-bottom:24px}
+  .strategy h2{font-size:18px;margin:0 0 6px;color:#93c5fd}
+  .strategy p{font-size:14px;color:#e2e8f0;margin:4px 0}
+  .sgov-box{background:var(--card);border-radius:16px;padding:14px;margin-top:20px;text-align:center}
+  .sgov-status{font-size:20px;font-weight:600}
+  .sgov-summary{font-size:13px;color:#cbd5e1;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 리밸런싱 & 매수 시그널 보드 (자동 연동 + 전략 + SGOV 상태)</h1>
+
+  <!-- 전략 개요 -->
+  <div id="strategy" class="strategy">전략 데이터를 불러오는 중...</div>
+
+  <!-- SGOV 상태 -->
+  <div id="sgovbox" class="sgov-box">💰 SGOV 자동 체크리스트 상태: 로딩중...</div>
+
+  <!-- 포트폴리오 게이지 -->
+  <div class="grid g3" id="gauges"></div>
+
+  <!-- 자산별 시그널 -->
+  <div class="grid g3" id="signals"></div>
+
+  <!-- 시장지표 -->
+  <div class="card center" style="margin-top:20px">
+    <p>📅 <span id="date">로딩중...</span></p>
+    <p>VIX: <b id="vix"></b> ｜ S&P fwd P/E: <b id="pe"></b> ｜ Nasdaq P/E: <b id="ndxpe"></b></p>
+  </div>
+
+  <div class="footer">signals.json 파일이 같은 폴더에 있으면 자동으로 전략, SGOV 상태, 시그널이 표시됩니다.</div>
+</div>
+
+<script>
+const state={portfolio:{income:63,growth:27,cash:10}};
+function el(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstChild;}
+function renderGauges(){
+ const g=document.getElementById('gauges');g.innerHTML='';
+ const entries=[['인컴(배당)',state.portfolio.income],['성장(기술)',state.portfolio.growth],['현금',state.portfolio.cash]];
+ entries.forEach(([label,val])=>{
+  const c=el(`<div class='card center'><div class='label'>${label}</div><div class='progress'><div class='bar' style='width:${val}%'></div></div><div class='value'>${val}%</div></div>`);
+  g.appendChild(c);
+ });
+}
+function color(status){
+ if(status.includes('매수'))return'var(--blue)';
+ if(status.includes('익절')||status.includes('트림'))return'var(--red)';
+ if(status.includes('대기'))return'var(--amber)';
+ if(status.includes('유지'))return'var(--green)';
+ return'var(--gray)';
+}
+function renderSignals(data){
+ const s=document.getElementById('signals');s.innerHTML='';
+ const keys=['meta','msft','orcl','schd','jepq','qqq','sgov'];
+ keys.forEach(k=>{
+  const d=data[k];if(!d)return;
+  const name=k.toUpperCase();
+  const c=el(`<div class='card signal'>
+   <div class='dot' style='background:${color(d.status)}'></div>
+   <div class='name'>${name}</div>
+   <div class='status'>${d.status}</div>
+   <div class='detail'>${d.comment||''}</div>
+  </div>`);
+  s.appendChild(c);
+ });
+}
+
+fetch('signals.json')
+ .then(r=>r.json())
+ .then(data=>{
+   // 전략 개요 표시
+   if(data.strategy_overview){
+     const so=data.strategy_overview;
+     document.getElementById('strategy').innerHTML=
+       `<h2>🎯 ${so.goal}</h2>
+        <p><b>구조:</b> ${so.core_structure}</p>
+        <p><b>목표 수익:</b> ${so.income_target}</p>
+        <p><b>리밸런싱 기준:</b> ${so.rebalance_rule}</p>
+        <p><b>철학:</b> ${so.philosophy}</p>`;
+   }
+   // SGOV 체크리스트 표시
+   if(data.sgov_checklist){
+     const box=document.getElementById('sgovbox');
+     const st=data.sgov_checklist.status;
+     const sum=data.sgov_checklist.summary;
+     let color='var(--green)';
+     if(st.includes('⚠️')) color='var(--amber)';
+     if(st.includes('🔄')) color='var(--blue)';
+     box.innerHTML=`💰 SGOV 자동 체크리스트 상태<br><span class='sgov-status' style='color:${color}'>${st}</span><div class='sgov-summary'>${sum}</div>`;
+   }
+   document.getElementById('date').textContent=data.date;
+   document.getElementById('vix').textContent=data.vix;
+   document.getElementById('pe').textContent=data.sp500_pe;
+   document.getElementById('ndxpe').textContent=data.nasdaq_pe;
+   renderGauges();renderSignals(data);
+ })
+ .catch(e=>{
+   document.getElementById('strategy').textContent='⚠️ signals.json 파일을 불러오지 못했습니다.';
+ });
+</script>
+</body>
+</html>
